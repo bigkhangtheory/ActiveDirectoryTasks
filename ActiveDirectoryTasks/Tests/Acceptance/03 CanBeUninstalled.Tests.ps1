@@ -4,7 +4,7 @@ if (-not $repository) {
     $repository = Get-PSRepository -Name PSGallery
 }
 $repositoryName = $repository.Name
-$moduleName = 'ServerTasks'
+$moduleName = $env:BHProjectName
 
 Describe "Module '$moduleName' can be uninstalled" -Tags 'FunctionalQuality' {
     It 'Offers as least one DSC Resource' {

@@ -4,11 +4,11 @@ if (-not $repository) {
     $repository = Get-PSRepository -Name PSGallery
 }
 $repositoryName = $repository.Name
-$moduleName = 'ServerTasks'
+$moduleName = $env:BHProjectName
 
-Describe "Module '$moduleName' is available" -Tags 'FunctionalQuality' {
+Describe "Module '$moduleName' is available on the repository '$repositoryName'" -Tags 'FunctionalQuality' {
     It 'Can be found' {
-        Get-Module -name $moduleName | Should Not BeNullOrEmpty
+        Get-Module -name $moduleName -Repository $repositoryName | Should Not BeNullOrEmpty
     }
 
     It "Module '$moduleName' can be imported" {
