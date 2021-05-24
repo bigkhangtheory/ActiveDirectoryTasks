@@ -48,9 +48,6 @@
 
     PSScriptAnalyzer      = 'latest'
     # Provides script analysis and checks for potential code defects in the scripts by applying a group of built-in or customized rules on the scripts being analyzed.
-
-    PSDepend                = 'latest'
-    # PowerShell Dependency Handler
     
     PSDeploy              = 'latest'
     # Module to simplify PowerShell based deployments
