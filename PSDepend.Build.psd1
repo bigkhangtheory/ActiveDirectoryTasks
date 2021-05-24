@@ -5,7 +5,7 @@
         Target         = 'BuildOutput\Modules'
         DependencyType = 'PSGalleryModule'
         Parameters     = @{
-            Repository = 'PSGallery'
+            Repository = 'MapPSGallery'
         }
     }
 
