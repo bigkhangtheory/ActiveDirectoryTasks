@@ -1,7 +1,7 @@
 # =============================================================================
 stages:
   - build
-#  - test 
+#  - test
 #  - staging
 #  - deploy
 
@@ -34,7 +34,7 @@ build:depends:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
-      - PSDepend.*.psd1
+        - PSDepend.*.psd1
   cache:
     # inherit all global cache settings
     <<: *global_cache
