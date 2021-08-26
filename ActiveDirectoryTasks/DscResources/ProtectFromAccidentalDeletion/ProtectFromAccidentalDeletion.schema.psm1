@@ -1,4 +1,4 @@
-﻿configuration AddsProtectFromAccidentalDeletion
+﻿configuration ProtectFromAccidentalDeletion
 {
     param
     (
@@ -57,7 +57,7 @@
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
-    if( $ProtectDomain -eq $true )
+    if ( $ProtectDomain -eq $true )
     {
         Script AddsProtectADDomain
         {
@@ -71,14 +71,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADDomain | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectOrgUnit -eq $true )
+    if ( $ProtectOrgUnit -eq $true )
     {
         Script AddsProtectOrgUnit
         {
@@ -92,14 +92,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADOrganizationalUnit -Filter $using:FilterOrgUnit | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectUser -eq $true )
+    if ( $ProtectUser -eq $true )
     {
         Script AddsProtectUser
         {
@@ -113,14 +113,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADUser -Filter $using:FilterUser | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectGroup -eq $true )
+    if ( $ProtectGroup -eq $true )
     {
         Script AddsProtectGroup
         {
@@ -134,14 +134,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADGroup -Filter $using:FilterGroup | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectComputer -eq $true )
+    if ( $ProtectComputer -eq $true )
     {
         Script AddsProtectComputer
         {
@@ -155,14 +155,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADComputer -Filter $using:FilterComputer | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectFineGrainedPasswordPolicy -eq $true )
+    if ( $ProtectFineGrainedPasswordPolicy -eq $true )
     {
         Script AddsProtectFineGrainedPasswordPolicy
         {
@@ -176,14 +176,14 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADFineGrainedPasswordPolicy -Filter $using:FilterFineGrainedPasswordPolicy | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
 
-    if( $ProtectReplicationSite -eq $true )
+    if ( $ProtectReplicationSite -eq $true )
     {
         Script AddsProtectReplicationSite
         {
@@ -197,10 +197,10 @@
  
                 return ($cnt -eq 0)
             }
-            SetScript = {      
+            SetScript  = {      
                 Get-ADReplicationSite -Filter $using:FilterReplicationSite | Set-ADObject -ProtectedFromAccidentalDeletion $true
             }
-            GetScript = { return @{result = 'N/A'} }
+            GetScript  = { return @{result = 'N/A' } }
         }            
     }
-}
+} #end configuration

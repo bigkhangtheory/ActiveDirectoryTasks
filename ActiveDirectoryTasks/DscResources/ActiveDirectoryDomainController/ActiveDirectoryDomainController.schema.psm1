@@ -1,4 +1,4 @@
-configuration AddsDomainController
+configuration ActiveDirectoryDomainController
 {
     param
     (
@@ -42,12 +42,14 @@ configuration AddsDomainController
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
         
-    WindowsFeature ADDS {
+    WindowsFeature ADDS
+    {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    WindowsFeature RSATADPowerShell {
+    WindowsFeature RSATADPowerShell
+    {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
         DependsOn = '[WindowsFeature]ADDS'

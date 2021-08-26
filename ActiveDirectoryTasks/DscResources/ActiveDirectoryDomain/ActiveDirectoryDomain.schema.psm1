@@ -1,4 +1,4 @@
-configuration AddsDomain
+configuration ActiveDirectoryDomain
 {
     param
     (
@@ -63,7 +63,7 @@ configuration AddsDomain
         DependsOn = '[WindowsFeature]ADDS'
     }
     
-   [string]$nextDependsOn = '[WindowsFeature]RSAT'
+    [string]$nextDependsOn = '[WindowsFeature]RSAT'
 
     if ($ForceRebootBefore -eq $true)
     {
@@ -75,20 +75,22 @@ configuration AddsDomain
             TestScript = {
                 $val = Get-ItemProperty -Path $using:rebootKeyName -Name $using:rebootVarName -ErrorAction SilentlyContinue
 
-                if ($val -ne $null -and $val.$rebootVarName -gt 0) { 
+                if ($val -ne $null -and $val.$rebootVarName -gt 0)
+                { 
                     return $true
                 }   
                 return $false
             }
-            SetScript = {
-                if( -not (Test-Path -Path $using:rebootKeyName) ) {
+            SetScript  = {
+                if ( -not (Test-Path -Path $using:rebootKeyName) )
+                {
                     New-Item -Path $using:rebootKeyName -Force
                 }
-                Set-ItemProperty -Path $rebootKeyName -Name $using:rebootVarName -value 1
+                Set-ItemProperty -Path $rebootKeyName -Name $using:rebootVarName -Value 1
                 $global:DSCMachineStatus = 1             
             }
-            GetScript = { return @{result = 'result'}}
-            DependsOn = $nextDependsOn
+            GetScript  = { return @{result = 'result' } }
+            DependsOn  = $nextDependsOn
         }        
 
         $nextDependsOn = "[Script]$rebootVarName"
@@ -123,7 +125,7 @@ configuration AddsDomain
         FeatureName                       = 'Recycle Bin Feature'
     }
 
-    if( $EnablePrivilegedAccessManagement -eq $true )
+    if ( $EnablePrivilegedAccessManagement -eq $true )
     {
         ADOptionalFeature PrivilegedAccessManagementFeature 
         {

@@ -1,0 +1,60 @@
+# Sites
+#
+# Specify named Replication Sites within Active Directory.
+# Sites are used in Active Directory to either enable clients to discover network resources (published shares, domain controllers) close to the physical location of a client computer or to reduce network traffic over wide area network (WAN) links.
+# Sites can also be used to optimize replication between domain controllers.
+Sites:
+- Name: HQ-SITE
+  Ensure: Present
+  Description: This site describes the Active Directory logical boundary found at Company headquarters.
+
+- Name: FL1-SITE
+  Ensure: Present
+  Description: this site describes the Active Directory logical boundary found at remote site located in Miami, FL.
+
+- Name: TN2-SITE
+  Ensure: Present
+  Description: This site describes the Active Directory logical boundary found at remote site located in Nashville, TN.
+
+# SiteLinks
+#
+# Specify named Replication Site Links within Active Directory.
+# A site link connects two or more sites.
+# Site links reflect the administrative policy for how sites are to be interconnected and the methods used to transfer replication traffic.
+SiteLinks:
+- Name: Link1
+  Cost: 100
+  ReplicationFrequencyInMinutes: 15
+  Description: This site link connects Active Directory sites to headquarters.
+  SitesIncluded:
+  - Site1
+  - Site2
+  Ensure: Present
+  # OptionChangeNotification
+  #
+  # Enables or disables Change Notification Replication on a site link. Default value is $false.
+  OptionChangeNotification: true
+  # OptionTwoWaySync
+  #
+  # Enables or disables Two Way Sync on a site link. Default value is $false.
+  OptionTwoWaySync: false
+  # OptionDisableCompression
+  #
+  # Enables or disables Compression on a site link. Default value is $false.
+  OptionDisableCompression: false
+
+
+# Subnets
+#
+# Specify named Replication Subnets within Active Directory
+Subnets:
+- Name: 10.101.1.0/24
+  Site: HQ-SITE
+  Location: Chesapeake, VA
+  Description: This subnet defines the logical network boundary for Windows Servers located at headquarters.
+  Ensure: Present
+
+- Name: 10.200.28.0/20
+  Site: TX4-SITE
+  Location: North Richland Hills, TX
+  Description: This subnet defines the logical network boundary for the remote site located in North Richland Hills, TX with site code TX4.

@@ -1,4 +1,4 @@
-configuration AddsDomainPrincipals
+configuration ActiveDirectoryDomainPrincipals
 {
     param
     (
@@ -22,7 +22,8 @@ configuration AddsDomainPrincipals
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
     
-    function AddMemberOf {
+    function AddMemberOf
+    {
         param (
             [String]   $ExecutionName,
             [String]   $ExecutionType,
@@ -30,7 +31,7 @@ configuration AddsDomainPrincipals
             [String[]] $MemberOf
         )
 
-        if( $null -ne $MemberOf -and $MemberOf.Count -gt 0 )
+        if ( $null -ne $MemberOf -and $MemberOf.Count -gt 0 )
         {
             Script "$($ExecutionName)_MemberOf"
             {
@@ -38,14 +39,14 @@ configuration AddsDomainPrincipals
                 {
                     # get current member groups in MemberOf 
                     $currentGroups = Get-ADPrincipalGroupMembership -Identity $using:AccountName | `
-                                     Where-Object { $using:MemberOf -contains $_.SamAccountName } | `
-                                     Select-Object -ExpandProperty SamAccountName
+                        Where-Object { $using:MemberOf -contains $_.SamAccountName } | `
+                        Select-Object -ExpandProperty SamAccountName
 
                     Write-Verbose "ADPrincipal '$using:AccountName' is member of required groups: $($currentGroups -join ', ')"
 
                     $missingGroups = $using:MemberOf | Where-Object { -not ($currentGroups -contains $_) }
 
-                    if( $missingGroups.Count -eq 0 )
+                    if ( $missingGroups.Count -eq 0 )
                     {  
                         return $true
                     }
@@ -53,22 +54,22 @@ configuration AddsDomainPrincipals
                     Write-Verbose "ADPrincipal '$using:AccountName' is not member of required groups: $($missingGroups -join ', ')"
                     return $false
                 }
-                SetScript = 
+                SetScript  = 
                 {
                     Add-ADPrincipalGroupMembership -Identity $using:AccountName -MemberOf $using:MemberOf
                 }
-                GetScript = { return 'NA' } 
-                DependsOn = "[$ExecutionType]$ExecutionName"
+                GetScript  = { return 'NA' } 
+                DependsOn  = "[$ExecutionType]$ExecutionName"
             }            
         }
     }
     
-    if( $null -ne $Computers )
+    if ( $null -ne $Computers )
     {
         foreach ($computer in $Computers)
         {
             # Remove Case Sensitivity of ordered Dictionary or Hashtables
-            $computer = @{}+$computer
+            $computer = @{} + $computer
 
             # save group list
             $memberOf = $computer.MemberOf
@@ -82,7 +83,7 @@ configuration AddsDomainPrincipals
         }
     }
 
-    if( $null -ne $Users )
+    if ( $null -ne $Users )
     {
         # convert DN to Fqdn
         $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
@@ -91,9 +92,9 @@ configuration AddsDomainPrincipals
         foreach ($user in $Users)
         {
             # Remove Case Sensitivity of ordered Dictionary or Hashtables
-            $user = @{}+$user
+            $user = @{} + $user
             
-            if( [string]::IsNullOrWhiteSpace($user.DomainName) )
+            if ( [string]::IsNullOrWhiteSpace($user.DomainName) )
             { 
                 $user.DomainName = $domainName
             }
@@ -112,25 +113,25 @@ configuration AddsDomainPrincipals
 
     $dependsOnKdsKey = $null
 
-    if( $null -ne $KDSKey )
+    if ( $null -ne $KDSKey )
     {
         (Get-DscSplattedResource -ResourceName ADKDSKey -ExecutionName 'adKDSKey' -Properties $KDSKey -NoInvoke).Invoke($KDSKey)
 
         $dependsOnKdsKey = '[ADKDSKey]adKDSKey'
     }
 
-    if( $null -ne $ManagedServiceAccounts )
+    if ( $null -ne $ManagedServiceAccounts )
     {
         foreach ($svcAccount in $ManagedServiceAccounts)
         {
             # Remove Case Sensitivity of ordered Dictionary or Hashtables
-            $svcAccount = @{}+$svcAccount
+            $svcAccount = @{} + $svcAccount
 
             # save group list
             $memberOf = $svcAccount.MemberOf
             $svcAccount.Remove( 'MemberOf' )
 
-            if( $null -ne $dependsOnKdsKey )
+            if ( $null -ne $dependsOnKdsKey )
             {
                 $svcAccount.DependsOn = $dependsOnKdsKey
             }

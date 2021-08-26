@@ -12,7 +12,7 @@
     # RootModule = ''
 
     # Version number of this module.
-    ModuleVersion        = '0.5.0'
+    ModuleVersion        = '2021.8.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -24,7 +24,7 @@
     Author               = 'Khang M. Nguyen'
 
     # Company or vendor of this module
-    CompanyName          = 'MAP Communications, Inc.'
+    CompanyName          = '@bigkhangtheory'
 
     # Copyright statement for this module
     Copyright            = '(c) 2021 Khang M. Nguyen. All rights reserved.'
@@ -122,4 +122,3 @@
     # DefaultCommandPrefix = ''
 
 }
-
