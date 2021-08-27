@@ -124,7 +124,7 @@ configuration ActiveDirectoryOrganizationalUnits
         # if not specified, set RestoreFromRecycleBin to $true
         if ($null -eq $Object.RestoreFromRecycleBin)
         {
-            $Object.RestoreFromRecycleBin = $true 
+            $Object.RestoreFromRecycleBin = $false 
         }
 
         # set recursive resource dependencies      
