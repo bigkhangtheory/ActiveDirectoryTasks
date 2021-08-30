@@ -1,18 +1,23 @@
 <#
     .DESCRIPTION
-        This DSC configuration manages groups and group memberships within Active Directory
+        This DSC configuration creates and manages User objects within Active Directory
     .PARAMETER DomainDN
         Distinguished Name (DN) of the domain.
-    .PARAMETER Groups
-        List of Organizational Units (OUs) within Active Directory.
+    .PARAMETER Users
+        Specify a list of Computers within Active Directory.
     .PARAMETER Credential
         Credentials used to enact the change upon.
+    .LINK
+        https://github.com/dsccommunity/ActiveDirectoryDsc/wiki/ADUser
+    .NOTES
+        Author:     Khang M. Nguyen
+        Created:    2021-08-29
 #>
 #Requires -Module ActiveDirectoryDsc
 #Requires -Module xPSDesiredStateConfiguration
 
 
-configuration ActiveDirectoryGroups
+configuration ActiveDirectoryUsers
 {
     param
     (
@@ -24,14 +29,14 @@ configuration ActiveDirectoryGroups
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
-        $Groups,
+        $Users,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
-    )
+    ) #end params
 
     <#
         Import required modules
@@ -173,7 +178,7 @@ configuration ActiveDirectoryGroups
         Convert DN to Fqdn
     #>
     $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
-    $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
     <#
         Wait for Active Directory domain controller to become available in the domain
@@ -194,7 +199,7 @@ configuration ActiveDirectoryGroups
     }
 
     # set Domain Name
-    $properties.DomainName = $domainName
+    $properties.DomainName = $myDomainName
 
     # set wait timeout
     $properties.WaitTimeout = 300
@@ -222,115 +227,184 @@ configuration ActiveDirectoryGroups
 
 
     <#
-        Create DSC resource for 'ADGroup'
+        Create DSC resource for 'ADUser'
     #>
 
-    # aggregate dependencies
-    #$dependencies = @()
-
-    <#
-        Enumerate all Groupes and create DSC resource
-    #>
-    foreach ( $g in $Groups )
+    # Enumerate all Groupes and create DSC resource
+    foreach ( $u in $Users )
     {
-        # save the MemberOf list and remove from primary hashtable
-        $memberOf = $g.MemberOf
-        $g.Remove('MemberOf')
+        # save the memberOf list and remove from main hashtable
+        $memberOf = $u.MemberOf
+        $u.Remove('MemberOf')
 
-        # remove case sensitivity from hashtables
-        $g = @{} + $g
+        # remove case sensitivity from orderd Dictionary and Hashtables
+        $u = @{ } + $u
 
-        # if not specified, set 'GroupScope' to 'Global'
-        if (-not $g.ContainsKey('GroupScope'))
+        # if not specifed, set 'DomainName'
+        if ((-not $u.ContainsKey('DomainName')) -or ([String]::IsNullOrWhiteSpace($u.DomainName)))
         {
-            $g.GroupScope = 'Global'
-        }
-
-        # if not specified, set the group Category to 'Security'
-        if (-not $g.ContainsKey('Category'))
-        {
-            $g.Category = 'Security'
-        }
-
-        # append the Domain DN to the group path
-        if ( $g.GroupScope -eq 'DomainLocal' )
-        {
-            #$dependencies += "[ADGroup]$executionName"
-            $g.Path = '{0},{1}' -f $g.Path, $DomainDn
-        }
-        elseif ( ($g.GroupScope -eq 'Global') -or (-not [string]::IsNullOrWhiteSpace($g.Path)) )
-        {
-            $g.Path = '{0},{1}' -f $g.Path, $DomainDn
+            $u.DomainName = $myDomainName
         }
 
         # if not specified, ensure 'Present'
-        if (-not $g.ContainsKey('Ensure'))
+        if (-not $u.ContainsKey('Ensure'))
         {
-            $g.Ensure = 'Present'
+            $u.Ensure = 'Present'
         }
 
-        # if not specified, set the DisplayName using the GroupName
-        if (-not $g.ContainsKey('DisplayName'))
+        # if not specified, set the 'CommonName' to match the 'UserName'
+        if (-not $u.ContainsKey('CommonName'))
         {
-            $g.DisplayName = $g.GroupName
+            $u.CommonName = $u.UserName
+        }
+
+        # if not specified, set 'UserPrincipalName' by appending the Computername with '@' and the domain name
+        if (-not $u.ContainsKey('UserPrincipalName'))
+        {
+            $u.UserPrincipalName = '{0}@{1}' -f $u.UserName, $myDomainName
+        }
+
+        # if not specified, set 'DisplayName' to match 'CommonName'
+        if (-not $u.ContainsKey('DisplayName'))
+        {
+            $u.Displayname = $u.UserName
+        }
+        
+
+        # set the Distinguished Name path of the Computer
+        if ($u.Path)
+        {
+            $u.Path = '{0},{1}' -f $u.Path, $DomainDN
+        }
+        else
+        {
+            # otherwise, set the default Computer container
+            $u.Path = 'CN=Users,{0}' -f $DomainDN 
+        }
+
+        # if note specified, set 'Country' to 'United States'
+        if (-not $u.ContainsKey('Country'))
+        {
+            $u.Country = 'US'
+        }
+        # if not specified, set the 'Department' to 'IT'
+        if (-not $u.ContainsKey('Department'))
+        {
+            $u.Department = 'IT'
+        }
+
+        # if not specified, set the 'Company' to 'MAP Communications'
+        if (-not $u.ContainsKey('Company'))
+        {
+            $u.Company = 'MAP Communications'
+        }
+
+        # if not specified, describe 'Notes' to specify DSC management
+        if (-not $u.ContainsKey('Notes'))
+        {
+            $u.Notes = @"
+This user account is being managed with Desired State Configuration (DSC).
+
+The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
+"@
+        }
+
+        # if not specified, set the 'Organization' to 'MAP Communications.'
+        if (-not $u.ContainsKey('Organization'))
+        {
+            $u.Organization = 'MAP Communications'
+        }
+
+        # it not specified, set 'Enabled'
+        if (-not $u.ContainsKey('Enabled'))
+        {
+            $u.Enabled = $true 
+        }
+
+        # if not specified, set 'CannotChangePassword' to $false
+        if (-not $u.ContainsKey('CannotChangePassword'))
+        {
+            $u.CannotChangePassword = $false
+        }
+
+        # if not specified, allow password expiration
+        if (-not $u.ContainsKey('PasswordNeverExpires'))
+        {
+            $u.PasswordNeverExpires = $false
+        }
+
+        # set the name of the Node assigned as the Domain Controller for the resource
+        if (-not $u.ContainsKey('DomainController'))
+        {
+            $u.DomainController = $node.Name
         }
 
         # if specified, add Credentials to perform the operation
         if ($PSBoundParameters.ContainsKey('Credential'))
         {
-            $g.Credential = $Credential
+            $u.Credential = $Credential
         }
 
-        # set the name of the Node assigned as the Domain Controller for the resource
-        if (-not $g.ContainsKey('DomainController'))
+        # if not specified, the User account is not trusted for delegation
+        if (-not $u.ContainsKey('TrustedForDelegation'))
         {
-            $g.DomainController = $node.Name
+            $u.TrustedForDelegation = $false
+        }
+        elseif ($u.TrustedForDelegation -eq $true)
+        {
+            $u.AccountNotDelegated = $false
         }
 
-        # if not specified, use 'SamAccountName' for membership operations
-        if (-not $g.ContainsKey('MembershipAttribute'))
+        # if not specified, disable restoring from Recycle Bin
+        if (-not $u.ContainsKey('RestoreFromRecycleBin'))
         {
-            $g.MembershipAttribute = 'SamAccountName'
+            $u.RestoreFromRecycleBin = $false
         }
 
-        # if not specified, describe 'Notes' to specify DSC management
-        if (-not $g.ContainsKey('Notes'))
+        # if not specified, set 'AccountNotDelegated' to $false
+        if (-not $u.ContainsKey('AccountNotDelegated'))
         {
-            $g.Notes = @'
-This user account is being managed with Desired State Configuration (DSC).
-
-The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
-'@
+            $u.AccountNotDelegated = $false
         }
 
-        # if not specified, disable 'RestoreFromRecycleBin'
-        if (-not $g.ContainsKey('RestoreFromRecycleBin'))
+        # if not specified, set 'AllowReversiblePasswordEncryption' to $false
+        if (-not $u.ContainsKey('AllowReversiblePasswordEncryption'))
         {
-            $g.RestoreFromRecycleBin = $false
+            $u.AllowReversiblePasswordEncryption = $false
+        }
+
+        # if not specified, set 'PasswordNotRequired' to $false
+        if (-not $u.ContainsKey('PasswordNotRequired'))
+        {
+            $u.PasswordNotRequired = $false
+        }
+
+        # if not specified, set 'SmartcardLogonRequired' to $false
+        if (-not $u.ContainsKey('SmartcardLogonRequired'))
+        {
+            $u.SmartcardLogonRequired = $false
         }
 
         # this resource depends on response from Active Directory
-        $g.DependsOn = $dependsOnWaitForADDomain
+        $u.DependsOn = $dependsOnWaitForADDomain
 
         # create execution name for the resource
-        $executionName = "$($g.GroupName -replace '[-().:\s]', '_')_$($myDomainName -replace '[-().:\s]', '_')"
+        $executionName = "$($u.UserName -replace '[-().:\s]', '_')_$($myDomainName -replace '[-().:\s]', '_')"
 
-        <#
-            Create DSC resource for Active Directory Groups
-        #>
+        # create DSC resource
         try
         {
             $Splatting = @{
-                ResourceName  = 'ADGroup'
+                ResourceName  = 'ADUser'
                 ExecutionName = $executionName
-                Properties    = $g
+                Properties    = $u
                 NoInvoke      = $true
             }
-            (Get-DscSplattedResource @Splatting).Invoke($g)
+            (Get-DscSplattedResource @Splatting).Invoke($u)
         }
         catch
         {
-            Write-Verbose -Message 'ERROR: Failed to add group memberships.'
+            Write-Verbose -Message 'ERROR: Failed to create resource for Active Directory User.'
             throw "$($_.Exception.Message)"
         } #end try
 
@@ -339,9 +413,9 @@ The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
         {
             # splat parameters
             $Splatting = @{
-                ExecutionType = 'ADGroup'
+                ExecutionType = 'ADUser'
                 ExecutionName = $executionName
-                Identity      = $g.GroupName
+                Identity      = $u.UserName
                 MemberOf      = $memberOf
             }
 

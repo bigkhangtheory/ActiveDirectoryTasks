@@ -1,39 +1,80 @@
+<#
+    .DESCRIPTION
+        This DSC configuration manages Users, Computers, and  Managed Service Accounts within Active Directory.
+    .PARAMETER DomainDN
+        Specify the Distinguished Name (DN) of the domain.
+    .PARAMETER KDSKey
+        Management of KDS Root Keys within Active Directory.
+    .PARAMETER ManagedServiceAccounts
+        Specify a list of managed service accounts to create within Active Directory.
+    .LINK
+        https://github.com/dsccommunity/ActiveDirectoryDsc/wiki/ADKDSKey
+        https://github.com/dsccommunity/ActiveDirectoryDsc/wiki/ADManagedServiceAccount
+    .NOTES
+        Author:     Khang M. Nguyen
+        Created:    2021-08-29
+#>
+#Requires -Module ActiveDirectoryDsc
+#Requires -Module xPSDesiredStateConfiguration
+
+
 configuration ActiveDirectoryDomainPrincipals
 {
     param
     (
         [Parameter(Mandatory)]
-        [String]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
         $DomainDN,
 
-        [Hashtable[]]
-        $Computers,
-
-        [Hashtable[]]
-        $Users,
-
-        [Hashtable]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable]
         $KDSKey,
 
-        [Hashtable[]]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable[]]
         $ManagedServiceAccounts
     )
 
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    <#
+        Import required modules
+    #>
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
-    
-    function AddMemberOf
+
+
+    <#
+        Help function to manage ADPrincipalGroupMembership
+    #>
+    function Add-MemberOfAttribute
     {
-        param (
-            [String]   $ExecutionName,
-            [String]   $ExecutionType,
-            [String]   $AccountName,
-            [String[]] $MemberOf
+        param
+        (
+            [Parameter()]
+            [ValidateNotNullOrEmpty()]
+            [System.String]
+            $ExecutionName,
+
+            [Parameter()]
+            [ValidateNotNullOrEmpty()]
+            [System.String]
+            $ExecutionType,
+
+            [Parameter()]
+            [ValidateNotNullOrEmpty()]
+            [System.String]
+            $AccountName,
+
+            [Parameter()]
+            [System.String[]]
+            $MemberOf
         )
 
         if ( $null -ne $MemberOf -and $MemberOf.Count -gt 0 )
         {
-            Script "$($ExecutionName)_MemberOf"
+            xScript "$($ExecutionName)_MemberOf"
             {
                 TestScript = 
                 {
@@ -62,8 +103,18 @@ configuration ActiveDirectoryDomainPrincipals
                 DependsOn  = "[$ExecutionType]$ExecutionName"
             }            
         }
-    }
+    } #end function Add-MemberOfAttribute
     
+
+
+    <#
+        Convert DN to Fqdn
+    #>
+    $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
+    $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+
+    
+
     if ( $null -ne $Computers )
     {
         foreach ($computer in $Computers)
@@ -79,7 +130,7 @@ configuration ActiveDirectoryDomainPrincipals
 
             (Get-DscSplattedResource -ResourceName ADComputer -ExecutionName $executionName -Properties $computer -NoInvoke).Invoke($computer)
 
-            AddMemberOf -ExecutionName $executionName -ExecutionType ADComputer -AccountName "$($computer.ComputerName)$" -MemberOf $memberOf
+            Add-MemberOfAttribute -ExecutionName $executionName -ExecutionType ADComputer -AccountName "$($computer.ComputerName)$" -MemberOf $memberOf
         }
     }
 
@@ -107,7 +158,7 @@ configuration ActiveDirectoryDomainPrincipals
 
             (Get-DscSplattedResource -ResourceName ADUser -ExecutionName $executionName -Properties $user -NoInvoke).Invoke($user)
 
-            AddMemberOf -ExecutionName $executionName -ExecutionType ADUser -AccountName $user.UserName -MemberOf $memberOf
+            Add-MemberOfAttribute -ExecutionName $executionName -ExecutionType ADUser -AccountName $user.UserName -MemberOf $memberOf
         }
     }
 
@@ -141,7 +192,7 @@ configuration ActiveDirectoryDomainPrincipals
             (Get-DscSplattedResource -ResourceName ADManagedServiceAccount -ExecutionName $executionName -Properties $svcAccount -NoInvoke).Invoke($svcAccount)
 
             # append $ to acoountname to identify it as MSA
-            AddMemberOf -ExecutionName $executionName -ExecutionType ADManagedServiceAccount -AccountName "$($svcAccount.ServiceAccountName)$" -MemberOf $memberOf
+            Add-MemberOfAttribute -ExecutionName $executionName -ExecutionType ADManagedServiceAccount -AccountName "$($svcAccount.ServiceAccountName)$" -MemberOf $memberOf
         }
     }
 }

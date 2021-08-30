@@ -16,20 +16,20 @@ configuration ActiveDirectoryOrganizationalUnits
     param
     (
         [Parameter(Mandatory)]
+        [ValidatePattern('^((DC=[^,]+,?)+)$')]
         [System.String]
         $DomainDN,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
         $OUs,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $Credential,
-
-        [Parameter()]
-        [System.Collections.Hashtable[]]
-        $Groups
+        [System.Management.Automation.Credential()]
+        $Credential
     )
 
     <#
@@ -42,19 +42,56 @@ configuration ActiveDirectoryOrganizationalUnits
         Convert DN to Fqdn
     #>
     $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
-    $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    WaitForADDomain Domain
+
+    # parameters for 'WaitForADDomain'
+    $waitForADDomain = @(
+        'Credential'
+    )
+
+    # store matching parameters into hashtable
+    $properties = New-Object -TypeName System.Collections.Hashtable
+
+    # enumerate parameters for matches in WaitForADDomain
+    foreach ($p in ($PSBoundParameters.GetEnumerator() | Where-Object -Property Key -In $waitForADDomain))
     {
-        DomainName = $domainName
+        $properties.Add($p.Key, $p.Value)
     }
+
+    # set Domain Name
+    $properties.DomainName = $myDomainName
+
+    # set wait timeout
+    $properties.WaitTimeout = 300
+
+    # if credentials are specifed, set 'WaitForValidCredentials'
+    if ($properties.ContainsKey('Credential'))
+    {
+        $properties.WaitForValidCredentials = $true
+    }
+
+    # set execution name for the resource
+    $executionName = "$($properties.DomainName -replace '[-().:\s]', '_')"
+
+    # create DSC resource
+    $Splatting = @{
+        ResourceName  = 'WaitForADDomain'
+        ExecutionName = $executionName
+        Properties    = $properties
+        NoInvoke      = $true
+    }
+    (Get-DscSplattedResource @Splatting).Invoke($properties)
+
+    # set resource name as dependency
+    $script:dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
+
 
     # used to aggregate OU resources as recursive dependencies
     $script:ouDependencies = @()
-
     <#
         This function is used as a recursive call to create Organizational Units.
     #>    
@@ -130,7 +167,7 @@ configuration ActiveDirectoryOrganizationalUnits
         # set recursive resource dependencies      
         if ($SkipDepend)
         {
-            $Object.DependsOn = '[WaitForADDomain]Domain'
+            $Object.DependsOn = $script:dependsOnWaitForADDomain
         }
         else
         {
@@ -174,11 +211,19 @@ configuration ActiveDirectoryOrganizationalUnits
     } #end function
     
 
+
     <#
         Enumerate all OUs and recursively create resource
     #>
+
+
+
     foreach ($ou in $OUs)
     {
+        # remove case sensitivity of ordered Dictionary or Hashtables
+        $ou = @{ } + $ou
+        
+        # if not specifed, set OU path at root of domain
         if ( [string]::IsNullOrWhitespace($ou.Path) )
         {
             $ou.Path = $DomainDN

@@ -1,18 +1,23 @@
 <#
     .DESCRIPTION
-        This DSC configuration manages groups and group memberships within Active Directory
+        This DSC configuration creates and manages Computer objects within Active Directory
     .PARAMETER DomainDN
         Distinguished Name (DN) of the domain.
-    .PARAMETER Groups
-        List of Organizational Units (OUs) within Active Directory.
+    .PARAMETER Computers
+        Specify a list of Computers within Active Directory.
     .PARAMETER Credential
         Credentials used to enact the change upon.
+    .LINK
+        https://github.com/dsccommunity/ActiveDirectoryDsc/wiki/ADComputer
+    .NOTES
+        Author:     Khang M. Nguyen
+        Created:    2021-08-29
 #>
 #Requires -Module ActiveDirectoryDsc
 #Requires -Module xPSDesiredStateConfiguration
 
 
-configuration ActiveDirectoryGroups
+configuration ActiveDirectoryComputers
 {
     param
     (
@@ -24,14 +29,14 @@ configuration ActiveDirectoryGroups
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
-        $Groups,
+        $Computers,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
-    )
+    ) #end params
 
     <#
         Import required modules
@@ -90,7 +95,7 @@ configuration ActiveDirectoryGroups
                 try
                 {
                     # retrieve current list of group memberships
-                    $uurrentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
+                    $currentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
                         Where-Object -Property $using:MemberOf -Contains -Value $_.SamAccountName | `
                         Select-Object -ExpandProperty SamAccountName
                 }
@@ -104,7 +109,7 @@ configuration ActiveDirectoryGroups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
                 {
-                    $missingGroups = $Using:MemberOf | Where-Object { -not ( $uurrentGroups -contains $_ ) }
+                    $missingGroups = $Using:MemberOf | Where-Object { -not ( $currentGroups -contains $_ ) }
                 }
                 catch
                 {
@@ -173,7 +178,7 @@ configuration ActiveDirectoryGroups
         Convert DN to Fqdn
     #>
     $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
-    $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
     <#
         Wait for Active Directory domain controller to become available in the domain
@@ -194,7 +199,7 @@ configuration ActiveDirectoryGroups
     }
 
     # set Domain Name
-    $properties.DomainName = $domainName
+    $properties.DomainName = $myDomainName
 
     # set wait timeout
     $properties.WaitTimeout = 300
@@ -222,115 +227,101 @@ configuration ActiveDirectoryGroups
 
 
     <#
-        Create DSC resource for 'ADGroup'
+        Create DSC resource for 'ADComputer'
     #>
 
-    # aggregate dependencies
-    #$dependencies = @()
 
-    <#
-        Enumerate all Groupes and create DSC resource
-    #>
-    foreach ( $g in $Groups )
+    # Enumerate all Groupes and create DSC resource
+    foreach ( $c in $Computers )
     {
-        # save the MemberOf list and remove from primary hashtable
-        $memberOf = $g.MemberOf
-        $g.Remove('MemberOf')
+        # save the memberOf list and remove from main hashtable
+        $memberOf = $c.MemberOf
+        $c.Remove('MemberOf')
 
-        # remove case sensitivity from hashtables
-        $g = @{} + $g
+        # remove case sensitivity from orderd Dictionary and Hashtables
+        $c = @{ } + $c
 
-        # if not specified, set 'GroupScope' to 'Global'
-        if (-not $g.ContainsKey('GroupScope'))
+        # if not specified, set 'DnsHostName' by appending the ComputerName with the domain name
+        if (-not $c.ContainsKey('DnsHostName'))
         {
-            $g.GroupScope = 'Global'
+            $c.DnsHostName = '{0}.{1}' -f $c.ComputerName, $myDomainName
         }
 
-        # if not specified, set the group Category to 'Security'
-        if (-not $g.ContainsKey('Category'))
+        # if not specified, set 'UserPrincipalName' by appending the Computername with '@' and the domain name
+        if (-not $c.ContainsKey('UserPrincipalName'))
         {
-            $g.Category = 'Security'
+            $c.UserPrincipalName = '{0}@{1}' -f $c.ComputerName, $myDomainName
         }
 
-        # append the Domain DN to the group path
-        if ( $g.GroupScope -eq 'DomainLocal' )
+        # if not specified, set 'DisplayName' with the 'ComputerName'
+        if (-not $c.ContainsKey('DisplayName'))
         {
-            #$dependencies += "[ADGroup]$executionName"
-            $g.Path = '{0},{1}' -f $g.Path, $DomainDn
-        }
-        elseif ( ($g.GroupScope -eq 'Global') -or (-not [string]::IsNullOrWhiteSpace($g.Path)) )
-        {
-            $g.Path = '{0},{1}' -f $g.Path, $DomainDn
+            $c.Displayname = $c.ComputerName
         }
 
-        # if not specified, ensure 'Present'
-        if (-not $g.ContainsKey('Ensure'))
+        # set the Distinguished Name path of the Computer
+        if ($c.Path)
         {
-            $g.Ensure = 'Present'
+            $c.Path = '{0},{1}' -f $c.Path, $DomainDN
+        }
+        else
+        {
+            # otherwise, set the default Computer container
+            $c.Path = 'CN=Computers,{0}' -f $DomainDN 
         }
 
-        # if not specified, set the DisplayName using the GroupName
-        if (-not $g.ContainsKey('DisplayName'))
+        # set the name of the Node assigned as the Domain Controller for the resource
+        if (-not $c.ContainsKey('DomainController'))
         {
-            $g.DisplayName = $g.GroupName
+            $c.DomainController = $node.Name
         }
 
         # if specified, add Credentials to perform the operation
         if ($PSBoundParameters.ContainsKey('Credential'))
         {
-            $g.Credential = $Credential
+            $c.Credential = $Credential
         }
 
-        # set the name of the Node assigned as the Domain Controller for the resource
-        if (-not $g.ContainsKey('DomainController'))
+        # if not specified, ensure 'Present'
+        if (-not $c.ContainsKey('Ensure'))
         {
-            $g.DomainController = $node.Name
+            $c.Ensure = 'Present'
         }
 
-        # if not specified, use 'SamAccountName' for membership operations
-        if (-not $g.ContainsKey('MembershipAttribute'))
+        # if not specified, set 'RestoreFromRecycleBin' to $false
+        if (-not $c.ContainsKey('RestoreFromRecycleBin'))
         {
-            $g.MembershipAttribute = 'SamAccountName'
+            $c.RestoreFromRecycleBin = $false
         }
 
-        # if not specified, describe 'Notes' to specify DSC management
-        if (-not $g.ContainsKey('Notes'))
+        # it not specified, set 'EnabledOnCreation'
+        if (-not $c.ContainsKey('EnabledOnCreation'))
         {
-            $g.Notes = @'
-This user account is being managed with Desired State Configuration (DSC).
-
-The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
-'@
+            $c.EnabledOnCreation = $true 
         }
 
-        # if not specified, disable 'RestoreFromRecycleBin'
-        if (-not $g.ContainsKey('RestoreFromRecycleBin'))
-        {
-            $g.RestoreFromRecycleBin = $false
-        }
+
 
         # this resource depends on response from Active Directory
-        $g.DependsOn = $dependsOnWaitForADDomain
+        $c.DependsOn = $dependsOnWaitForADDomain
 
         # create execution name for the resource
-        $executionName = "$($g.GroupName -replace '[-().:\s]', '_')_$($myDomainName -replace '[-().:\s]', '_')"
+        $executionName = "$($c.ComputerName -replace '[-().:\s]', '_')_$($myDomainName -replace '[-().:\s]', '_')"
 
-        <#
-            Create DSC resource for Active Directory Groups
-        #>
+        # create DSC resource
         try
         {
             $Splatting = @{
-                ResourceName  = 'ADGroup'
+                ResourceName  = 'ADComputer'
                 ExecutionName = $executionName
-                Properties    = $g
+                Properties    = $c
                 NoInvoke      = $true
             }
-            (Get-DscSplattedResource @Splatting).Invoke($g)
+            (Get-DscSplattedResource @Splatting).Invoke($c)
         }
         catch
         {
-            Write-Verbose -Message 'ERROR: Failed to add group memberships.'
+            Write-Verbose -Message 'ERROR: Failed to compile MOF file.'
             throw "$($_.Exception.Message)"
         } #end try
 
@@ -339,9 +330,9 @@ The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
         {
             # splat parameters
             $Splatting = @{
-                ExecutionType = 'ADGroup'
+                ExecutionType = 'ADComputer'
                 ExecutionName = $executionName
-                Identity      = $g.GroupName
+                Identity      = $c.ComputerName
                 MemberOf      = $memberOf
             }
 

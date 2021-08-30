@@ -1,0 +1,4 @@
+ForestDN: DC=mapcom,DC=local
+ForestMode: Windows2008R2Forest
+DomainDN: DC=mapcom,DC=local
+DomainMode: Windows2008R2Domain
