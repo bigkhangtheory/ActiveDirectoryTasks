@@ -28,7 +28,7 @@
     DscBuildHelpers              = 'latest'
     # Build Helpers for DSC Resources and Configurations
 
-    InvokeBuild                  = 'latest'
+    InvokeBuild                  = '5.8.4'
     # Build and test automation in PowerShell
 
     Pester                       = '4.10.1'
@@ -40,7 +40,7 @@
     'posh-git'                   = 'latest'
     # Provides prompt with Git status summary information and tab completion for Git commands, parameters, remotes and branch names.
 
-    'powershell-yaml'            = 'latest'
+    'powershell-yaml'            = '0.4.2'
     # Powershell module for serializing and deserializing YAML
 
     ProtectedData                = '4.1.3'
