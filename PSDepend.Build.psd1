@@ -56,7 +56,7 @@
     # DSC Resources
     # -------------------------------------------------------------------------
     
-    AccessControlDsc             = '1.0.0.0'
+    AccessControlDsc             = '1.4.1'
     # The AccessControlDsc module allows you to configure and manage access control on NTFS and Registry objects. It also allows management of audit access for Active Directory object SACL.
     
     ActiveDirectoryDsc           = '6.0.1'

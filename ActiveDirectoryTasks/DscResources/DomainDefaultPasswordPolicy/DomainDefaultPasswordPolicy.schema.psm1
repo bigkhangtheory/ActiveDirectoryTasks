@@ -1,7 +1,7 @@
 <#
     .DESCRIPTION
         This DSC configuration manages an Active Directory domain's default password policy.
-    .PARAMETER DomainName
+    .PARAMETER DomainDN
         Specify the name of the domain to which the password policy will be applied.
     .PARAMETER ComplexityEnabled
         Specify whether password complexity is enabled for the default password policy.
@@ -46,9 +46,9 @@ configuration DomainDefaultPasswordPolicy
     param
     (
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [ValidatePattern('^((DC=[^,]+,?)+)$')]
         [System.String]
-        $DomainName,
+        $DomainDN,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -115,16 +115,7 @@ configuration DomainDefaultPasswordPolicy
     <#
         Parameters for DSC resource 'ADDomainDefaultPasswordPolicy'
     #>
-    $waitForADDomain = @(
-        'DomainName',
-        'Credential'
-    )
-
-    <#
-        Parameters for DSC resource 'ADDomainDefaultPasswordPolicy'
-    #>
     $adDomainDefaultPasswordPolicy = @(
-        'DomainName',
         'ComplexityEnabled',
         'LockoutDuration',
         'LockoutObservationWindow',
@@ -139,24 +130,29 @@ configuration DomainDefaultPasswordPolicy
     )
 
     <#
+        Convert DN to Fqdn
+    #>
+    $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+
+
+    <#
         Wait for Active Directory domain controller to become available in the domain
     #>
 
     # store matching parameters into hashtable
     $properties = New-Object -TypeName System.Collections.Hashtable
 
-    # enumerate parameters for matches in WaitForADDomain
-    foreach ($p in ($PSBoundParameters.GetEnumerator() | Where-Object -Property Key -In $waitForADDomain))
-    {
-        $properties.Add($p.Key, $p.Value)
-    }
+    # set Domain name
+    $properties.DomainName = $myDomainName
 
     # set wait timeout
     $properties.WaitTimeout = 300
 
-    # if credentials are specifed, set 'WaitForValidCredentials'
-    if ($properties.ContainsKey('Credential'))
+    # if credentials are specified, set and wait for valid credentials
+    if ($null -ne $Credential)
     {
+        $properties.Credential = $Credential
         $properties.WaitForValidCredentials = $true
     }
 
@@ -194,6 +190,9 @@ configuration DomainDefaultPasswordPolicy
     {
         $properties.DomainController = $node.Name
     }
+
+    # set the Domain Name for the resource
+    $properties.DomainName = $myDomainName
 
     # this resource depends on availability of the Domain
     $properties.DependsOn = $dependsOnWaitForADDomain

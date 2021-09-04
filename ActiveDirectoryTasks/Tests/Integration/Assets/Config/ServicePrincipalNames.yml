@@ -1,0 +1,7 @@
+DomainDN: DC=example,DC=com
+SPNs:
+  - ServicePrincipalName: MSSQLSvc/sql01.example.com:1433
+    Account: svc_mssql
+    Ensure:   Present
+  - ServicePrincipalName: HTTP/web.example.com
+    Account: WEBSERVER01$
