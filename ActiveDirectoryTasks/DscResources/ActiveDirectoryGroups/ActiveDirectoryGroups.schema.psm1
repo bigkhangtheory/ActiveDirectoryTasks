@@ -284,7 +284,7 @@ configuration ActiveDirectoryGroups
         # set the name of the Node assigned as the Domain Controller for the resource
         if (-not $g.ContainsKey('DomainController'))
         {
-            $g.DomainController = $node.Name
+            $g.DomainController = [System.Net.Dns]::GetHostByName("$($node.Name)").HostName
         }
 
         # if not specified, use 'SamAccountName' for membership operations
@@ -297,7 +297,7 @@ configuration ActiveDirectoryGroups
         if (-not $g.ContainsKey('Notes'))
         {
             $g.Notes = @'
-This user account is being managed with Desired State Configuration (DSC).
+This security group is being managed with Desired State Configuration (DSC).
 
 The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
 '@
