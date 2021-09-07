@@ -90,8 +90,8 @@ configuration ActiveDirectoryGroups
                 try
                 {
                     # retrieve current list of group memberships
-                    $uurrentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
-                        Where-Object -Property $using:MemberOf -Contains -Value $_.SamAccountName | `
+                    $currentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
+                        Where-Object { $using:MemberOf -Contains $_.SamAccountName } | `
                         Select-Object -ExpandProperty SamAccountName
                 }
                 catch
@@ -104,7 +104,7 @@ configuration ActiveDirectoryGroups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
                 {
-                    $missingGroups = $Using:MemberOf | Where-Object { -not ( $uurrentGroups -contains $_ ) }
+                    $missingGroups = $Using:MemberOf | Where-Object { -not ( $currentGroups -contains $_ ) }
                 }
                 catch
                 {

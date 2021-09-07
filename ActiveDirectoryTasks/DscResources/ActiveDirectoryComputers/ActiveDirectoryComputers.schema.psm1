@@ -96,7 +96,7 @@ configuration ActiveDirectoryComputers
                 {
                     # retrieve current list of group memberships
                     $currentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
-                        Where-Object -Property $using:MemberOf -Contains -Value $_.SamAccountName | `
+                        Where-Object { $using:MemberOf -Contains $_.SamAccountName } | `
                         Select-Object -ExpandProperty SamAccountName
                 }
                 catch
