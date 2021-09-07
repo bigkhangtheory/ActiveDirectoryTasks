@@ -105,6 +105,8 @@ configuration ActiveDirectoryUsers
                     throw "$($_.Exception.Message)"
                 } #end try
 
+                Write-Verbose -Message "ADPrincipal '$using:Identity' is member of required groups: $($currentGroups -join ', ')"
+                
                 # identify any missing groups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
@@ -118,18 +120,14 @@ configuration ActiveDirectoryUsers
                 }
 
                 # if no missing groups, return $true
-                if ( $missingGroups.Count -eq 0 )
+                if ( $null -eq $missingGroups )
                 {
-                    Write-Verbose -Message "The principal $Using:Identity is missing $($missingGroups.Count) groups."
                     return $true
                 }
-                else
-                {
-                    # otherwise, return $false
-                    Write-Verbose -Message "The principal $Using:Identity is missing $($missingGroups.Count) groups."
-                    Write-Verbose -Message "The principal $Using:Identity is not a member of the required groups: $($missingGroups -join ', ')"
-                    return $false 
-                }
+                
+                # otherwise, return $false
+                Write-Verbose -Message "The principal $Using:Identity is not a member of the required groups: $($missingGroups -join ', ')"
+                return $false 
             } #end TestScript
 
             <#
