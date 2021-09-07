@@ -101,22 +101,10 @@ configuration ActiveDirectoryAcls
                                     $e.ActiveDirectoryRights = 'GenericAll'
                                 }
                                 
-                                # if 'ObjectType' not specified, set all object types
-                                if ($null -eq $e.ObjectType)
-                                {
-                                    $e.ObjectType = '00000000-0000-0000-0000-000000000000'
-                                }
-
                                 # if 'InheritianceType' not specifed, allow all
                                 if ($null -eq $e.InheritanceType)
                                 {
                                     $e.InheritanceType = 'All'
-                                }
-
-                                # if 'InheritedObjectType' not specified, set all object types
-                                if ($null -eq $e.InheritedObjectType)
-                                {
-                                    $e.InheritedObjectType = '00000000-0000-0000-0000-000000000000'
                                 }
 
                                 # if not specified, ensure 'Present'
