@@ -159,7 +159,28 @@ configuration ActiveDirectoryGroups
             <#
                 Get the resource
             #>
-            GetScript  = { return 'NA' }
+            GetScript  =
+            {
+                Write-Verbose -Message "Retrieving current list of group memberships for the principal $Using:Identity..."
+                try
+                {
+                    # retrieve current list of group memberships
+                    $currentGroups = Get-ADPrincipalGroupMembership -Identity $Using:Identity | `
+                        Where-Object { $using:MemberOf -Contains $_.SamAccountName } | `
+                        Select-Object -ExpandProperty SamAccountName
+                }
+                catch
+                {
+                    Write-Verbose -Message "Retrieving current list of group memberships for the principal $Using:Identity... FAILED."
+                    throw "$($_.Exception.Message)"
+                } #end try
+
+
+                return @{
+                    Result = "$($currentGroups -join ', ')"
+                }
+            
+            }
             
             # this resource depends on the created principal
             DependsOn  = "[$ExecutionType]$ExecutionName"

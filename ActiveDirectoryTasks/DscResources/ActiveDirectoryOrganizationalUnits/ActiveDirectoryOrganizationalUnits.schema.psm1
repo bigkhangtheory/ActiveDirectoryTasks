@@ -23,13 +23,7 @@ configuration ActiveDirectoryOrganizationalUnits
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
-        $OUs,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential
+        $OUs
     )
 
     <#
@@ -47,47 +41,10 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-
-    # parameters for 'WaitForADDomain'
-    $waitForADDomain = @(
-        'Credential'
-    )
-
-    # store matching parameters into hashtable
-    $properties = New-Object -TypeName System.Collections.Hashtable
-
-    # enumerate parameters for matches in WaitForADDomain
-    foreach ($p in ($PSBoundParameters.GetEnumerator() | Where-Object -Property Key -In $waitForADDomain))
+    WaitForADDomain EnableWaitForDomain
     {
-        $properties.Add($p.Key, $p.Value)
+        DomainName = $myDomainName 
     }
-
-    # set Domain Name
-    $properties.DomainName = $myDomainName
-
-    # set wait timeout
-    $properties.WaitTimeout = 300
-
-    # if credentials are specifed, set 'WaitForValidCredentials'
-    if ($properties.ContainsKey('Credential'))
-    {
-        $properties.WaitForValidCredentials = $true
-    }
-
-    # set execution name for the resource
-    $executionName = "$($properties.DomainName -replace '[-().:\s]', '_')"
-
-    # create DSC resource
-    $Splatting = @{
-        ResourceName  = 'WaitForADDomain'
-        ExecutionName = $executionName
-        Properties    = $properties
-        NoInvoke      = $true
-    }
-    (Get-DscSplattedResource @Splatting).Invoke($properties)
-
-    # set resource name as dependency
-    $script:dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
 
 
     # used to aggregate OU resources as recursive dependencies
@@ -106,10 +63,6 @@ configuration ActiveDirectoryOrganizationalUnits
             [Parameter(Mandatory)]
             [System.String]
             $ParentPath,
-
-            [Parameter()]
-            [System.Management.Automation.PSCredential]
-            $Credential,
 
             [Parameter()]
             [Switch]
@@ -131,13 +84,6 @@ configuration ActiveDirectoryOrganizationalUnits
                     Object     = $ou
                     ParentPath = $ouPath
                 }
-                
-                # if specified, call passing Credentials
-                if ($Credential)
-                {
-                    $Splatting.Credential = $Credential
-                }
-
                 Get-OrgUnitSplat @Splatting
             }
         } #end recursive condition
@@ -152,62 +98,27 @@ configuration ActiveDirectoryOrganizationalUnits
             $Object.Ensure = 'Present'
         }
 
-        # if not specified, set ProtectFromAccidentalDeletion to $true
-        if ($null -eq $Object.ProtectedFromAccidentalDeletion)
-        {
-            $Object.ProtectedFromAccidentalDeletion = $true
-        }
-
-        # if not specified, set RestoreFromRecycleBin to $true
-        if ($null -eq $Object.RestoreFromRecycleBin)
-        {
-            $Object.RestoreFromRecycleBin = $false 
-        }
-
         # set recursive resource dependencies      
         if ($SkipDepend)
         {
-            $Object.DependsOn = $script:dependsOnWaitForADDomain
+            ADOrganizationalUnit ($ouPath -Replace ',|=')
+            {
+                Name        = $Object.Name
+                Path        = $Object.Path
+                Description = $Object.Description
+                DependsOn   = '[WaitForADDomain]EnableWaitForDomain'
+            }
         }
         else
         {
-            $Object.DependsOn = "[ADOrganizationalUnit]$($ParentPath -Replace ',|=')"
+            ADOrganizationalUnit ($ouPath -Replace ',|=')
+            {
+                Name        = $Object.Name
+                Path        = $Object.Path
+                Description = $Object.Description
+                DependsOn   = "[ADOrganizationalUnit]$($ParentPath -Replace ',|=')"
+            }
         } #end if
-
-        # if specified, create resource with Credential
-        if ($Credential)
-        {
-            <#
-                Create resource using Credentials
-            #>
-            ADOrganizationalUnit ($ouPath -Replace ',|=')
-            {
-                Name                            = $Object.Name
-                Path                            = $Object.Path
-                Description                     = $Object.Description
-                Ensure                          = $Object.Ensure
-                ProtectedFromAccidentalDeletion = $Object.ProtectedFromAccidentalDeletion
-                RestoreFromRecycleBin           = $Object.RestoreFromRecycleBin
-                Credential                      = $Credential
-                DependsOn                       = $Object.DependsOn
-            }
-        }
-        else
-        {
-            <#
-                Create resource with no Credentials
-            #>
-            ADOrganizationalUnit ($ouPath -Replace ',|=')
-            {
-                Name                            = $Object.Name
-                Path                            = $Object.Path
-                Description                     = $Object.Description
-                Ensure                          = $Object.Ensure
-                ProtectedFromAccidentalDeletion = $Object.ProtectedFromAccidentalDeletion
-                RestoreFromRecycleBin           = $Object.RestoreFromRecycleBin
-                DependsOn                       = $Object.DependsOn
-            }
-        } #end if 
     } #end function
     
 
@@ -220,9 +131,6 @@ configuration ActiveDirectoryOrganizationalUnits
 
     foreach ($ou in $OUs)
     {
-        # remove case sensitivity of ordered Dictionary or Hashtables
-        $ou = @{ } + $ou
-        
         # if not specifed, set OU path at root of domain
         if ( [string]::IsNullOrWhitespace($ou.Path) )
         {
@@ -240,12 +148,6 @@ configuration ActiveDirectoryOrganizationalUnits
             ParentPath = $ou.Path
             SkipDepend = $true
         }
-
-        if ($Credential)
-        {
-            $Splatting.Credential = $Credential
-        }
-
         Get-OrgUnitSplat @Splatting 
     } #end foreach
 } #end configuration
