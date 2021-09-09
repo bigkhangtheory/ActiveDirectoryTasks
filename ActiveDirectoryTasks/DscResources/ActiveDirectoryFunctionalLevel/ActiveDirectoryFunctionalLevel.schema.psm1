@@ -17,6 +17,7 @@
         Created:    2021-08-30
 #>
 #Requires -Module ActiveDirectoryDsc
+#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryFunctionalLevel
@@ -47,7 +48,7 @@ configuration ActiveDirectoryFunctionalLevel
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -64,6 +65,19 @@ configuration ActiveDirectoryFunctionalLevel
         Wait for Active Directory domain controller to become available in the domain
     #>
 
+    xWindowsFeature AddAdDomainServices
+    {
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
+    }
+
+    xWindowsFeature AddRSATADPowerShell
+    {
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+    }
+
     # set execution name for the resource
     $executionName = "Domain_$($myDomainName -replace '[-().:\s]', '_')"
 
@@ -71,9 +85,11 @@ configuration ActiveDirectoryFunctionalLevel
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
+
 
     # create DSC resource
     ADDomainFunctionalLevel "$executionName"
@@ -106,6 +122,7 @@ configuration ActiveDirectoryFunctionalLevel
         {
             DomainName  = $myForestName
             WaitTimeout = 300
+            DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
         }
 
         # set resource name as dependency
@@ -116,7 +133,7 @@ configuration ActiveDirectoryFunctionalLevel
         {
             ForestIdentity = $ForestDN
             ForestMode     = $ForestMode
-            #DependsOn      = $dependsOnWaitForADDomain
+            DependsOn      = $dependsOnWaitForADDomain
         } #end ADForestFunctionalLevel
     } #end if 
 } #end configuration

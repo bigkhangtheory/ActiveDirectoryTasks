@@ -29,7 +29,7 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -41,10 +41,30 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    WaitForADDomain EnableWaitForDomain
+    xWindowsFeature AddAdDomainServices
     {
-        DomainName = $myDomainName 
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
     }
+
+    xWindowsFeature AddRSATADPowerShell
+    {
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+    }
+
+    # set execution name for the resource
+    $executionName = "$($myDomainName -replace '[-().:\s]', '_')"
+
+    WaitForADDomain "$executionName"
+    {
+        DomainName  = $myDomainName
+        WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+    }
+    # set resource name as dependency
+    $script:dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
 
 
     # used to aggregate OU resources as recursive dependencies
@@ -106,7 +126,7 @@ configuration ActiveDirectoryOrganizationalUnits
                 Name        = $Object.Name
                 Path        = $Object.Path
                 Description = $Object.Description
-                DependsOn   = '[WaitForADDomain]EnableWaitForDomain'
+                DependsOn   = $script:dependsOnWaitForADDomain
             }
         }
         else

@@ -13,6 +13,7 @@
         Specify a list of Service Principal Names to register.
 #>
 #Requires -Module ActiveDirectoryDsc
+#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ServicePrincipalNames
@@ -33,6 +34,7 @@ configuration ServicePrincipalNames
     <#
         Import required modules
     #>
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
     
 
@@ -43,13 +45,30 @@ configuration ServicePrincipalNames
     $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
 
+    <#
+        Ensure required Windows Features
+    #>
+    xWindowsFeature AddAdDomainServices
+    {
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
+    }
+
+    xWindowsFeature AddRSATADPowerShell
+    {
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+    }
+
     # set execution name for the resource
     $executionName = "$($myDomainName -replace '[-().:\s]', '_')"
 
-    # create DSC resource
     WaitForADDomain "$executionName"
     {
-        DomainName = $myDomainName 
+        DomainName  = $myDomainName
+        WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"

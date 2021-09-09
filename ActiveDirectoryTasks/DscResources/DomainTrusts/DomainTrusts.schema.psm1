@@ -7,6 +7,7 @@
         Specify a list of Active Directory Trusts to create with the Domain.
 #>
 #Requires -Module ActiveDirectoryDsc
+#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration DomainTrusts
@@ -27,7 +28,7 @@ configuration DomainTrusts
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -39,6 +40,21 @@ configuration DomainTrusts
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
+    <#
+        Ensure required Windows Features
+    #>
+    xWindowsFeature AddAdDomainServices
+    {
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
+    }
+
+    xWindowsFeature AddRSATADPowerShell
+    {
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+    }
 
     # set execution name for the resource
     $executionName = "$($myDomainName -replace '[-().:\s]', '_')"
@@ -47,6 +63,7 @@ configuration DomainTrusts
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"

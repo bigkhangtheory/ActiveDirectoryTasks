@@ -16,6 +16,11 @@ configuration ActiveDirectorySites
 {
     param 
     (
+        [Parameter(Mandatory)]
+        [ValidatePattern('^((DC=[^,]+,?)+)$')]
+        [System.String]
+        $DomainDN,
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
@@ -40,6 +45,12 @@ configuration ActiveDirectorySites
 
 
     <#
+        Convert DN to Fqdn
+    #>
+    $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+
+    <#
         Ensure required Windows Features
     #>
     xWindowsFeature AddAdDomainServices
@@ -47,11 +58,25 @@ configuration ActiveDirectorySites
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
-    xWindowsFeature AddRsatAdPowerShell
+
+    xWindowsFeature AddRSATADPowerShell
     {
-        Name   = 'RSAT-AD-PowerShell'
-        Ensure = 'Present'
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
     }
+
+    # set execution name for the resource
+    $executionName = "$($myDomainName -replace '[-().:\s]', '_')"
+
+    WaitForADDomain "$executionName"
+    {
+        DomainName  = $myDomainName
+        WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+    }
+    # set resource name as dependency
+    $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
 
 
     # create array to folder site resources as dependencies

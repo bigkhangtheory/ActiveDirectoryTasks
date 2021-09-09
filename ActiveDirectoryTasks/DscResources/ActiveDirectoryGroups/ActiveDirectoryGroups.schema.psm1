@@ -192,50 +192,34 @@ configuration ActiveDirectoryGroups
         Convert DN to Fqdn
     #>
     $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
-    $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
+    $myDomainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
 
-    # parameters for 'WaitForADDomain'
-    $waitForADDomain = @(
-        'Credential'
-    )
-
-    # store matching parameters into hashtable
-    $properties = New-Object -TypeName System.Collections.Hashtable
-
-    # enumerate parameters for matches in WaitForADDomain
-    foreach ($p in ($PSBoundParameters.GetEnumerator() | Where-Object -Property Key -In $waitForADDomain))
+    xWindowsFeature AddAdDomainServices
     {
-        $properties.Add($p.Key, $p.Value)
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
     }
 
-    # set Domain Name
-    $properties.DomainName = $domainName
-
-    # set wait timeout
-    $properties.WaitTimeout = 300
-
-    # if credentials are specifed, set 'WaitForValidCredentials'
-    if ($properties.ContainsKey('Credential'))
+    xWindowsFeature AddRSATADPowerShell
     {
-        $properties.WaitForValidCredentials = $true
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
-    $executionName = "$($properties.DomainName -replace '[-().:\s]', '_')"
+    $executionName = "$($myDomainName -replace '[-().:\s]', '_')"
 
-    # create DSC resource
-    $Splatting = @{
-        ResourceName  = 'WaitForADDomain'
-        ExecutionName = $executionName
-        Properties    = $properties
-        NoInvoke      = $true
+    WaitForADDomain "$executionName"
+    {
+        DomainName  = $myDomainName
+        WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
     }
-    (Get-DscSplattedResource @Splatting).Invoke($properties)
-
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
 

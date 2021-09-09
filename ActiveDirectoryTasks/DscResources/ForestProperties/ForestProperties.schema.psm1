@@ -48,6 +48,7 @@ configuration ForestProperties
     <#
         Import required modules
     #>
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     
@@ -62,34 +63,31 @@ configuration ForestProperties
         Wait for Active Directory domain controller to become available in the domain
     #>
 
-    # store matching parameters into hashtable
-    $properties = New-Object -TypeName System.Collections.Hashtable
-
-    # set Domain name
-    $properties.DomainName = $myForestName
-
-    # set wait timeout
-    $properties.WaitTimeout = 300
-
-    # if credentials are specified, set and wait for valid credentials
-    if ($null -ne $Credential)
+    <#
+        Ensure required Windows Features
+    #>
+    xWindowsFeature AddAdDomainServices
     {
-        $properties.Credential = $Credential
-        $properties.WaitForValidCredentials = $true
+        Name   = 'AD-Domain-Services'
+        Ensure = 'Present'
+    }
+
+    xWindowsFeature AddRSATADPowerShell
+    {
+        Name      = 'RSAT-AD-PowerShell'
+        Ensure    = 'Present'
+        DependsOn = '[xWindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
-    $executionName = "$($properties.DomainName -replace '[-().:\s]', '_')"
+    $executionName = "$($myForestName -replace '[-().:\s]', '_')"
 
-    # create DSC resource
-    $Splatting = @{
-        ResourceName  = 'WaitForADDomain'
-        ExecutionName = $executionName
-        Properties    = $properties
-        NoInvoke      = $true
+    WaitForADDomain "$executionName"
+    {
+        DomainName  = $myForestName
+        WaitTimeout = 300
+        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
     }
-    (Get-DscSplattedResource @Splatting).Invoke($properties)
-
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
 
