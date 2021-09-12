@@ -146,9 +146,6 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Enumerate all OUs and recursively create resource
     #>
-
-
-
     foreach ($ou in $OUs)
     {
         # if not specifed, set OU path at root of domain

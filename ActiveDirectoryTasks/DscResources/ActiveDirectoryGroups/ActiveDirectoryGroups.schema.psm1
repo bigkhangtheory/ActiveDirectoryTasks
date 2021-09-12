@@ -287,7 +287,7 @@ configuration ActiveDirectoryGroups
         # set the name of the Node assigned as the Domain Controller for the resource
         if (-not $g.ContainsKey('DomainController'))
         {
-            $g.DomainController = [System.Net.Dns]::GetHostByName("$($node.Name)").HostName
+            $g.DomainController = $node.Name
         }
 
         # if not specified, use 'SamAccountName' for membership operations
