@@ -5,19 +5,7 @@ Groups:
     GroupScope:  Global
     Path:        OU=Privileged,OU=IT,OU=Roles,OU=Groups,OU=Enterprise
     Description: Members of this group are granted administrative rights to dot accounts for tier 1 Information Technology services and resources.
-    # Members
-    #
-    # Active Directory group membership should match membership exactly.
-    Members:
-      - .abundhu
-      - .ariddell
-      - .awallace
-      - .gacevedo
-      - .khenderson
-      - System Administrators (II)
-    MemberOf:
-      - Account Operators
-      - Print Operators
+
 
   - GroupName: App_123_Read
     Path: OU=Groups,OU=Admin

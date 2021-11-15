@@ -27,12 +27,22 @@ configuration ForestProperties
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String[]]
-        $ServicePrincipalNameSuffix,
+        $ServicePrincipalNameSuffixToAdd,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String[]]
-        $UserPrincipalNameSuffix,
+        $ServicePrincipalNameSuffixToRemove,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String[]]
+        $UserPrincipalNameSuffixToAdd,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String[]]
+        $UserPrincipalNameSuffixToRemove,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -51,7 +61,7 @@ configuration ForestProperties
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
-    
+
     <#
         Convert DN to Fqdn
     #>
@@ -96,8 +106,10 @@ configuration ForestProperties
         Parameters for DSC resource 'ADForestProperties'
     #>
     $adForestProperties = @(
-        'ServicePrincipalNameSuffix',
-        'UserPrincipalNameSuffix',
+        'ServicePrincipalNameSuffixToAdd',
+        'ServicePrincipalNameSuffixToRemove',
+        'UserPrincipalNameSuffixToAdd',
+        'UserPrincipalNameSuffixToRemove',
         'TombStoneLifetime',
         'Credential'
     )
