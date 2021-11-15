@@ -31,7 +31,7 @@ cache: &global_cache
 prepare:
   stage: prepare
   script:
-    - .\Build.ps1 -CleanBuildOutput
+    - .\Build.ps1 -Tasks CleanBuildOutput
   cache:
     # inherit all global cache settings
     <<: *global_cache
