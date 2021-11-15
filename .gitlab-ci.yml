@@ -1,5 +1,6 @@
 # =============================================================================
 stages:
+  - prepare
   - build
 #  - test
 #  - staging
@@ -25,6 +26,20 @@ cache: &global_cache
   policy: pull-push
 
 # -----------------------------------------------------------------------------
+# PREPARE
+# -----------------------------------------------------------------------------
+prepare:
+  stage: prepare
+  script:
+    - .\Build.ps1 -CleanBuildOutput
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+  only:
+    - master
+
+
+# -----------------------------------------------------------------------------
 # STAGE: BUILD
 # -----------------------------------------------------------------------------
 build:depends:
@@ -37,3 +52,5 @@ build:depends:
   artifacts:
     reports:
       junit: ["BuildOutput/Pester/IntegrationTestResults.xml"]
+  only:
+    - master
