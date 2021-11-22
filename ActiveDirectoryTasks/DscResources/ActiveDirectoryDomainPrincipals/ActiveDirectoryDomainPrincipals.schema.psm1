@@ -76,9 +76,9 @@ configuration ActiveDirectoryDomainPrincipals
         {
             xScript "$($ExecutionName)_MemberOf"
             {
-                TestScript = 
+                TestScript =
                 {
-                    # get current member groups in MemberOf 
+                    # get current member groups in MemberOf
                     $currentGroups = Get-ADPrincipalGroupMembership -Identity $using:AccountName | `
                         Where-Object { $using:MemberOf -contains $_.SamAccountName } | `
                         Select-Object -ExpandProperty SamAccountName
@@ -88,23 +88,23 @@ configuration ActiveDirectoryDomainPrincipals
                     $missingGroups = $using:MemberOf | Where-Object { -not ($currentGroups -contains $_) }
 
                     if ( $missingGroups.Count -eq 0 )
-                    {  
+                    {
                         return $true
                     }
 
                     Write-Verbose "ADPrincipal '$using:AccountName' is not member of required groups: $($missingGroups -join ', ')"
                     return $false
                 }
-                SetScript  = 
+                SetScript  =
                 {
                     Add-ADPrincipalGroupMembership -Identity $using:AccountName -MemberOf $using:MemberOf
                 }
-                GetScript  = { return 'NA' } 
+                GetScript  = { return 'NA' }
                 DependsOn  = "[$ExecutionType]$ExecutionName"
-            }            
+            }
         }
     } #end function Add-MemberOfAttribute
-    
+
 
 
     <#
@@ -113,54 +113,6 @@ configuration ActiveDirectoryDomainPrincipals
     $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
     $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
 
-    
-
-    if ( $null -ne $Computers )
-    {
-        foreach ($computer in $Computers)
-        {
-            # Remove Case Sensitivity of ordered Dictionary or Hashtables
-            $computer = @{} + $computer
-
-            # save group list
-            $memberOf = $computer.MemberOf
-            $computer.Remove( 'MemberOf' )
-
-            $executionName = "adComputer_$($computer.ComputerName)"
-
-            (Get-DscSplattedResource -ResourceName ADComputer -ExecutionName $executionName -Properties $computer -NoInvoke).Invoke($computer)
-
-            Add-MemberOfAttribute -ExecutionName $executionName -ExecutionType ADComputer -AccountName "$($computer.ComputerName)$" -MemberOf $memberOf
-        }
-    }
-
-    if ( $null -ne $Users )
-    {
-        # convert DN to Fqdn
-        $pattern = '(?i)DC=(?<name>\w+){1,}?\b'
-        $domainName = ([RegEx]::Matches($DomainDN, $pattern) | ForEach-Object { $_.groups['name'] }) -join '.'
-
-        foreach ($user in $Users)
-        {
-            # Remove Case Sensitivity of ordered Dictionary or Hashtables
-            $user = @{} + $user
-            
-            if ( [string]::IsNullOrWhiteSpace($user.DomainName) )
-            { 
-                $user.DomainName = $domainName
-            }
-
-            # save group list
-            $memberOf = $user.MemberOf
-            $user.Remove( 'MemberOf' )
-
-            $executionName = "adUser_$($user.UserName)"
-
-            (Get-DscSplattedResource -ResourceName ADUser -ExecutionName $executionName -Properties $user -NoInvoke).Invoke($user)
-
-            Add-MemberOfAttribute -ExecutionName $executionName -ExecutionType ADUser -AccountName $user.UserName -MemberOf $memberOf
-        }
-    }
 
     $dependsOnKdsKey = $null
 

@@ -15,7 +15,7 @@
 #Requires -Module ActiveDirectoryDsc
 
 
-configuration ForestProperties
+configuration ForestUserPrincipalNames
 {
     param
     (
@@ -27,12 +27,7 @@ configuration ForestProperties
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String[]]
-        $ServicePrincipalNameSuffixToAdd,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String[]]
-        $ServicePrincipalNameSuffixToRemove,
+        $UserPrincipalNameSuffix,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -43,11 +38,6 @@ configuration ForestProperties
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $UserPrincipalNameSuffixToRemove,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.Int32]
-        $TombstoneLifetime,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -106,11 +96,9 @@ configuration ForestProperties
         Parameters for DSC resource 'ADForestProperties'
     #>
     $adForestProperties = @(
-        'ServicePrincipalNameSuffixToAdd',
-        'ServicePrincipalNameSuffixToRemove',
+        'UserPrincipalNameSuffix'
         'UserPrincipalNameSuffixToAdd',
         'UserPrincipalNameSuffixToRemove',
-        'TombStoneLifetime',
         'Credential'
     )
 
@@ -134,7 +122,7 @@ configuration ForestProperties
     $properties.DependsOn = $dependsOnWaitForADDomain
 
     # set execution name for the resource
-    $executionName = "$($properties.ForestName -replace '[-().:\s]', '_')"
+    $executionName = "UserPrincipalNames_$($properties.ForestName -replace '[-().:\s]', '_')"
 
     # create DSC resource
     $Splatting = @{

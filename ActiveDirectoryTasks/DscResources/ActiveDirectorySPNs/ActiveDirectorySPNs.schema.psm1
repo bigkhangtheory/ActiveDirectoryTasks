@@ -1,7 +1,7 @@
 <#
+    .SYNOPSIS
+        This DSC configuration will manage registered Service Principal Names (SPNs) within Active Directory.
     .DESCRIPTION
-        This DSC configuration will manage registered Service Principal Names (SPN).
-        
         A service principal name (SPN) is a unique identifier of a service instance.
 
         SPNs are used by Kerberos authentication to associate a service instance with a service logon account.
@@ -16,7 +16,7 @@
 #Requires -Module xPSDesiredStateConfiguration
 
 
-configuration ServicePrincipalNames
+configuration ActiveDirectorySPNs
 {
     param
     (
@@ -36,7 +36,7 @@ configuration ServicePrincipalNames
     #>
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
-    
+
 
     <#
         Convert DN to Fqdn

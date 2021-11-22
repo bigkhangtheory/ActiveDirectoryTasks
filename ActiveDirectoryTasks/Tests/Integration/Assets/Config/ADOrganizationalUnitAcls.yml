@@ -1,0 +1,51 @@
+DomainDN: DC=example,DC=com
+Paths:
+  - Name: Enterprise
+    ChildPath:
+      # ---
+      - Name: Groups
+        ChildPath:
+          # ---
+          - Name: Distribution
+            AccessControlList:
+              # ---
+              - IdentityReference: MAPCOM\Distribution Lists Administrators
+                PermissionEntries:
+                  # ---
+                  - AccessControlType: Allow
+                    ActiveDirectoryRights:
+                      - GenericAll
+                    ActiveDirectorySecurityInheritance: Descendents
+                    InheritedObjectType: Group
+          # ---
+          - Name: Organization
+            AccessControlList:
+              # ---
+              - IdentityReference: MAPCOM\Group Membership Operators
+                PermissionEntries:
+                  # ---
+                  - AccessControlType: Allow
+                    ActiveDirectoryRights:
+                      - GenericRead
+                      - GenericExecute
+                    ActiveDirectorySecurityInheritance: Descendents
+                    InheritedObjectType: Group
+                  # ---
+                  - AccessControlType: Allow
+                    ActiveDirectoryRights:
+                      - ExtendedRight
+                    ObjectType: Membership
+                    ActiveDirectorySecurityInheritance: Descendents
+                    InheritedObjectType: Group
+          # ---
+          - Name: Privileged
+            AccessControlList:
+              # ---
+              - IdentityReference: MAPCOM\Privleged Group Administrators
+                PermissionEntries:
+                  # ---
+                  - AccessControlType: Allow
+                    ActiveDirectoryRights:
+                      - GenericAll
+                    ActiveDirectorySecurityInheritance: Descendents
+                    InheritedObjectType: Group

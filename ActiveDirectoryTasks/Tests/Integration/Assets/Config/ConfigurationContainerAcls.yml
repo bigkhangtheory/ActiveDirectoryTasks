@@ -1,0 +1,46 @@
+DomainDN: DC=example,DC=com
+Paths:
+  - Name: Configuration
+    ChildPath:
+      # ---
+      - Name: Services
+        ChildPath:
+          # ---
+          - Name: NetServices
+            AccessControlList:
+              # ---
+              - IdentityReference: EXAMPLE\DHCP Administrators
+                PermissionEntries:
+                  # ---
+                  - AccessControlType:      Allow
+                    ActiveDirectoryRights:  GenericAll
+          # ---
+          - Name: Public Key Services
+            AccessControlList:
+              # ---
+              - IdentityReference: MAPCOM\Certificate Authority Administrators
+                PermissionEntries:
+                  # ---
+                  - AccessControlType:      Allow
+                    ActiveDirectoryRights:  GenericAll
+            ChildPath:
+              # ---
+              - Name: Certificate Templates
+                ChildPath:
+                  # ---
+                  - Name: Administrator
+                    AccessControlList:
+                      # ---
+                      - IdentityReference: MAPCOM\Certificate Authority Administrators
+                        PermissionEntries:
+                          # ---
+                          - AccessControlType: Allow
+                            ActiveDirectoryRights:
+                              - GenericRead
+                              - GenericWrite
+                              - WriteDacl
+                          # ---
+                          - AccessControlType: Allow
+                            ActiveDirectoryRights: ExtendedRight
+                            ObjectType: Certificate-Enrollment
+

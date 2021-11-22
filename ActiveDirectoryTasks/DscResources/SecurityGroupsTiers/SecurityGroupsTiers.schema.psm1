@@ -1,10 +1,10 @@
 <#
     .DESCRIPTION
-        This DSC configuration is used to manage group memberships of Distribution Groups within Active Directory
+        This DSC configuration is used to manage memberships of tiered Security Groups within Active Directory.
     .PARAMETER DomainDN
         Distinguished Name (DN) of the domain.
     .PARAMETER Groups
-        List of Organizational Units (OUs) within Active Directory.
+        List of Security Groups
     .PARAMETER Credential
         Credentials used to enact the change upon.
 #>
@@ -12,7 +12,7 @@
 #Requires -Module xPSDesiredStateConfiguration
 
 
-configuration ActiveDirectoryDistributionGroups
+configuration SecurityGroupsTiers
 {
     param
     (
@@ -243,12 +243,13 @@ configuration ActiveDirectoryDistributionGroups
         # remove case sensitivity from hashtables
         $g = @{} + $g
 
-        # this resource must be of 'Global' type
+        # this group must be type 'Global'
         $g.GroupScope = 'Global'
 
-        # this resource must be of 'Distribution' category
-        $g.Category = 'Distribution'
+        # this group must be type 'Security'
+        $g.Category = 'Security'
 
+        # append the Domain DN to the group path
         if (-not [string]::IsNullOrWhiteSpace($g.Path))
         {
             $g.Path = '{0},{1}' -f $g.Path, $DomainDn
@@ -288,7 +289,7 @@ configuration ActiveDirectoryDistributionGroups
         if (-not $g.ContainsKey('Notes'))
         {
             $g.Notes = @'
-This distribution list is being managed with Desired State Configuration (DSC).
+This security group is being managed with Desired State Configuration (DSC).
 
 The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
 '@
@@ -300,12 +301,11 @@ The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
             $g.RestoreFromRecycleBin = $false
         }
 
-        # this resource must be
         # this resource depends on response from Active Directory
         $g.DependsOn = $dependsOnWaitForADDomain
 
         # create execution name for the resource
-        $executionName = "$($g.Category)_$($g.GroupScope)_$($g.GroupName -replace '[-().:\s]', '_')"
+        $executionName = "$($g.GroupScope)_$($g.Category)_$($g.GroupName -replace '[-().:\s]', '_')"
 
         <#
             Create DSC resource for Active Directory Groups

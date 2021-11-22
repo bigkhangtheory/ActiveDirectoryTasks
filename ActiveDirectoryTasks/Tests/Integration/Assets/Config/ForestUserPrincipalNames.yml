@@ -3,22 +3,11 @@
 # Specifies the target Active Directory forest for the change.
 ForestDN: DC=example,DC=com
 
-# ServicePrincipalNameSuffix
-#
-# Specifies the Service Principal Name (SPN) Suffix(es) to be explicitly defined in the forest and replace existing Service Principal Names.
-ServicePrincipalNameSuffixToAdd:
-  - example.com
-
 # UserPrincipalNameSuffix
 #
 # Specifies the User Principal Name (UPN) Suffix(es) to be explicitly defined in the forest and replace existing User Principal Names.
 UserPrincipalNameSuffixToAdd:
   - example.com
-
-# TombStoneLifetime
-#
-# Specifies the AD Tombstone lifetime which determines how long deleted items exist in Active Directory before they are purged.
-TombStoneLifetime: 200
 
 # Credential
 #
