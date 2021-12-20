@@ -1,4 +1,4 @@
-# DhcpServerTasks
+# ActiveDirectoryTasks
 
 This repo provides a structured project for building re-usable and composable **DSC Configurations** _(DSC Composite Resources.md)_ used to manage and configuration **Active Diretory Domain Services**.
 
@@ -25,6 +25,7 @@ This repo provides a structured project for building re-usable and composable **
 | [DomainTrusts](./Docs/Configurations/DomainTrusts.md)                                             | This DSC configuration manages Domain Trusts within Active Directory.                                                      | *Published* |
 | [ForestServicePrincipalNames](./Docs/Configurations/ForestServicePrincipalNames.md)               | This DSC configuration manages the addition of supported Service Principal Names within an Active Directory Forest.        | *Published* |
 | [ForestUserPrincipalNames](./Docs/Configurations/ForestUserPrincipalNames.md)                     | This DSC configuration will manage forest wide User Principal Name (UPN) suffixes within Active Directory.                 | *Published* |
+| [NodeGroupMemberships](./Docs/Configurations/NodeGroupMemberships.md)                             | This DSC configuration is used to enroll a target node within a defined Active Directory security group.                   | *Published* |
 | [ProtectFromAccidentalDeletion](./Docs/Configurations/ProtectFromAccidentalDeletion.md)           | This DSC configuration prevents AD objects from being deleted.                                                             | *Published* |
 
 ---
