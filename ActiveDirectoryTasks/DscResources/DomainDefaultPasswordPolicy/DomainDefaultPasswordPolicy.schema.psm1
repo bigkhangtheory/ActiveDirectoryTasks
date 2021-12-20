@@ -79,7 +79,7 @@ configuration DomainDefaultPasswordPolicy
         [ValidateRange(0, 1438560)]
         [System.UInt32]
         $MaxPasswordAge,
-        
+
         [Parameter()]
         [ValidateRange(0, 14)]
         [System.UInt32]
@@ -110,7 +110,7 @@ configuration DomainDefaultPasswordPolicy
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -144,17 +144,17 @@ configuration DomainDefaultPasswordPolicy
     <#
         Ensure required Windows Features
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -164,7 +164,7 @@ configuration DomainDefaultPasswordPolicy
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"

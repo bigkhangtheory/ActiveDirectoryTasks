@@ -17,7 +17,6 @@
         Created:    2021-08-30
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryFunctionalLevel
@@ -48,7 +47,7 @@ configuration ActiveDirectoryFunctionalLevel
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -65,17 +64,17 @@ configuration ActiveDirectoryFunctionalLevel
         Wait for Active Directory domain controller to become available in the domain
     #>
 
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -85,7 +84,7 @@ configuration ActiveDirectoryFunctionalLevel
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -96,7 +95,7 @@ configuration ActiveDirectoryFunctionalLevel
     {
         DomainIdentity = $DomainDN
         DomainMode     = $DomainMode
-        #DependsOn      = $dependsOnWaitForADDomain
+        DependsOn      = $dependsOnWaitForADDomain
     } #nd ADDomainFunctionalLevel
 
 
@@ -122,7 +121,7 @@ configuration ActiveDirectoryFunctionalLevel
         {
             DomainName  = $myForestName
             WaitTimeout = 300
-            DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+            DependsOn   = '[WindowsFeature]AddRSATADPowershell'
         }
 
         # set resource name as dependency
@@ -135,5 +134,5 @@ configuration ActiveDirectoryFunctionalLevel
             ForestMode     = $ForestMode
             DependsOn      = $dependsOnWaitForADDomain
         } #end ADForestFunctionalLevel
-    } #end if 
+    } #end if
 } #end configuration

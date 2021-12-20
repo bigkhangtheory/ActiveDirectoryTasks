@@ -14,7 +14,6 @@
         Created:    2021-08-29
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryComputers
@@ -41,7 +40,7 @@ configuration ActiveDirectoryComputers
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -84,7 +83,7 @@ configuration ActiveDirectoryComputers
         <#
             Create DSC xScript resource
         #>
-        xScript "$($ExecutionName)_MemberOf"
+        Script "$($ExecutionName)_MemberOf"
         {
             <#
                 Test the resource
@@ -106,7 +105,7 @@ configuration ActiveDirectoryComputers
                 } #end try
 
                 Write-Verbose -Message "ADPrincipal '$using:Identity' is member of required groups: $($currentGroups -join ', ')"
-                
+
                 # identify any missing groups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
@@ -124,19 +123,19 @@ configuration ActiveDirectoryComputers
                 {
                     return $true
                 }
-                
+
                 # otherwise, return $false
                 Write-Verbose -Message "The principal $Using:Identity is not a member of the required groups: $($missingGroups -join ', ')"
-                return $false 
+                return $false
             } #end TestScript
 
             <#
                 Set the resource
             #>
-            SetScript  = 
+            SetScript  =
             {
                 Write-Verbose -Message "Adding the principal $Using:Identity as member of the required groups: $($Using:MemberOf -join ', ')..."
-                
+
                 # split parameters
                 $Splatting = @{
                     Identity = $Using:Identity
@@ -146,7 +145,7 @@ configuration ActiveDirectoryComputers
                 # if specified, add Credentials to perform the operation
                 if ($null -ne $Using:Credential)
                 {
-                    $Splatting.Credential = $Using:Credential 
+                    $Splatting.Credential = $Using:Credential
                 }
 
                 # set the group membership
@@ -164,8 +163,8 @@ configuration ActiveDirectoryComputers
             <#
                 Get the resource
             #>
-            GetScript  = { return 'NA' }
-            
+            GetScript  = { return @{ result = 'N/A' } }
+
             # this resource depends on the created principal
             DependsOn  = "[$ExecutionType]$ExecutionName"
         } #end xScript
@@ -181,17 +180,17 @@ configuration ActiveDirectoryComputers
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -201,7 +200,7 @@ configuration ActiveDirectoryComputers
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -248,7 +247,7 @@ configuration ActiveDirectoryComputers
         else
         {
             # otherwise, set the default Computer container
-            $c.Path = 'CN=Computers,{0}' -f $DomainDN 
+            $c.Path = 'CN=Computers,{0}' -f $DomainDN
         }
 
         # set the name of the Node assigned as the Domain Controller for the resource
@@ -278,7 +277,7 @@ configuration ActiveDirectoryComputers
         # it not specified, set 'EnabledOnCreation'
         if (-not $c.ContainsKey('EnabledOnCreation'))
         {
-            $c.EnabledOnCreation = $true 
+            $c.EnabledOnCreation = $true
         }
 
 

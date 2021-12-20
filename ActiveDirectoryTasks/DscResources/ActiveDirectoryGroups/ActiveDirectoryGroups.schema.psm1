@@ -9,7 +9,6 @@
         Credentials used to enact the change upon.
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryGroups
@@ -28,6 +27,11 @@ configuration ActiveDirectoryGroups
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DomainController,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -36,7 +40,7 @@ configuration ActiveDirectoryGroups
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -79,7 +83,7 @@ configuration ActiveDirectoryGroups
         <#
             Create DSC xScript resource
         #>
-        xScript "$($ExecutionName)_MemberOf"
+        Script "$($ExecutionName)_MemberOf"
         {
             <#
                 Test the resource
@@ -101,7 +105,7 @@ configuration ActiveDirectoryGroups
                 } #end try
 
                 Write-Verbose -Message "ADPrincipal '$using:Identity' is member of required groups: $($currentGroups -join ', ')"
-                
+
                 # identify any missing groups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
@@ -119,19 +123,19 @@ configuration ActiveDirectoryGroups
                 {
                     return $true
                 }
-                
+
                 # otherwise, return $false
                 Write-Verbose -Message "The principal $Using:Identity is not a member of the required groups: $($missingGroups -join ', ')"
-                return $false 
+                return $false
             } #end TestScript
 
             <#
                 Set the resource
             #>
-            SetScript  = 
+            SetScript  =
             {
                 Write-Verbose -Message "Adding the principal $Using:Identity as member of the required groups: $($Using:MemberOf -join ', ')..."
-                
+
                 # split parameters
                 $Splatting = @{
                     Identity = $Using:Identity
@@ -141,7 +145,7 @@ configuration ActiveDirectoryGroups
                 # if specified, add Credentials to perform the operation
                 if ($null -ne $Using:Credential)
                 {
-                    $Splatting.Credential = $Using:Credential 
+                    $Splatting.Credential = $Using:Credential
                 }
 
                 # set the group membership
@@ -179,9 +183,9 @@ configuration ActiveDirectoryGroups
                 return @{
                     Result = "$($currentGroups -join ', ')"
                 }
-            
+
             }
-            
+
             # this resource depends on the created principal
             DependsOn  = "[$ExecutionType]$ExecutionName"
         } #end xScript
@@ -198,17 +202,20 @@ configuration ActiveDirectoryGroups
         Wait for Active Directory domain controller to become available in the domain
     #>
 
-    xWindowsFeature AddAdDomainServices
+    if (-not $PSBoundParameters.ContainsKey('DomainController'))
     {
-        Name   = 'AD-Domain-Services'
-        Ensure = 'Present'
-    }
+        WindowsFeature AddAdDomainServices
+        {
+            Name   = 'AD-Domain-Services'
+            Ensure = 'Present'
+        }
 
-    xWindowsFeature AddRSATADPowerShell
-    {
-        Name      = 'RSAT-AD-PowerShell'
-        Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        WindowsFeature AddRSATADPowerShell
+        {
+            Name      = 'RSAT-AD-PowerShell'
+            Ensure    = 'Present'
+            DependsOn = '[WindowsFeature]AddAdDomainServices'
+        }
     }
 
     # set execution name for the resource
@@ -218,7 +225,7 @@ configuration ActiveDirectoryGroups
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -278,16 +285,16 @@ configuration ActiveDirectoryGroups
             $g.DisplayName = $g.GroupName
         }
 
+        # set the name of the Node assigned as the Domain Controller for the resource
+        if (-not $PSBoundParameters.ContainsKey('DomainController'))
+        {
+            $g.DomainController = $node.Name
+        }
+
         # if specified, add Credentials to perform the operation
         if ($PSBoundParameters.ContainsKey('Credential'))
         {
             $g.Credential = $Credential
-        }
-
-        # set the name of the Node assigned as the Domain Controller for the resource
-        if (-not $g.ContainsKey('DomainController'))
-        {
-            $g.DomainController = $node.Name
         }
 
         # if not specified, use 'SamAccountName' for membership operations

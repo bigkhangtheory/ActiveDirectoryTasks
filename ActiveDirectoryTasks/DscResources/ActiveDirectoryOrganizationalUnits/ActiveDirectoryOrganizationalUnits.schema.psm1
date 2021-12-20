@@ -29,7 +29,7 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -41,17 +41,17 @@ configuration ActiveDirectoryOrganizationalUnits
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -61,7 +61,7 @@ configuration ActiveDirectoryOrganizationalUnits
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $script:dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -71,7 +71,7 @@ configuration ActiveDirectoryOrganizationalUnits
     $script:ouDependencies = @()
     <#
         This function is used as a recursive call to create Organizational Units.
-    #>    
+    #>
     function Get-OrgUnitSplat
     {
         param
@@ -118,7 +118,7 @@ configuration ActiveDirectoryOrganizationalUnits
             $Object.Ensure = 'Present'
         }
 
-        # set recursive resource dependencies      
+        # set recursive resource dependencies
         if ($SkipDepend)
         {
             ADOrganizationalUnit ($ouPath -Replace ',|=')
@@ -140,7 +140,7 @@ configuration ActiveDirectoryOrganizationalUnits
             }
         } #end if
     } #end function
-    
+
 
 
     <#
@@ -165,6 +165,6 @@ configuration ActiveDirectoryOrganizationalUnits
             ParentPath = $ou.Path
             SkipDepend = $true
         }
-        Get-OrgUnitSplat @Splatting 
+        Get-OrgUnitSplat @Splatting
     } #end foreach
 } #end configuration

@@ -1,23 +1,30 @@
-[cmdletBinding()]
-Param (
+[CmdletBinding()]
+param
+(
     [Parameter(Position = 0)]
     $Tasks,
 
+    [Parameter()]
     [switch]
     $ResolveDependency,
 
-    [string]
+    [Parameter()]
+    [System.String]
     $BuildOutput = 'BuildOutput',
 
-    [string]
+    [Parameter()]
+    [System.String]
     $Repository = 'PSGallery',
 
+    [Parameter()]
     [uri]
     $RepositoryProxy
 )
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
+
 $buildModulesPath = Join-Path -Path $BuildOutput -ChildPath Modules
+
 $projectPath = $PSScriptRoot
 $timeStamp = Get-Date -UFormat '%Y%m%d-%H%M%S'
 $psVersion = $PSVersionTable.PSVersion.Major

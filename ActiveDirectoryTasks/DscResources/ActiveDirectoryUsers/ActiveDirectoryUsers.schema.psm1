@@ -14,7 +14,6 @@
         Created:    2021-08-29
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryUsers
@@ -41,7 +40,7 @@ configuration ActiveDirectoryUsers
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -84,7 +83,7 @@ configuration ActiveDirectoryUsers
         <#
             Create DSC xScript resource
         #>
-        xScript "$($ExecutionName)_MemberOf"
+        Script "$($ExecutionName)_MemberOf"
         {
             <#
                 Test the resource
@@ -106,7 +105,7 @@ configuration ActiveDirectoryUsers
                 } #end try
 
                 Write-Verbose -Message "ADPrincipal '$using:Identity' is member of required groups: $($currentGroups -join ', ')"
-                
+
                 # identify any missing groups
                 Write-Verbose -Message "Identifying missing group memberships for the principal $Using:Identity..."
                 try
@@ -124,19 +123,19 @@ configuration ActiveDirectoryUsers
                 {
                     return $true
                 }
-                
+
                 # otherwise, return $false
                 Write-Verbose -Message "The principal $Using:Identity is not a member of the required groups: $($missingGroups -join ', ')"
-                return $false 
+                return $false
             } #end TestScript
 
             <#
                 Set the resource
             #>
-            SetScript  = 
+            SetScript  =
             {
                 Write-Verbose -Message "Adding the principal $Using:Identity as member of the required groups: $($Using:MemberOf -join ', ')..."
-                
+
                 # split parameters
                 $Splatting = @{
                     Identity = $Using:Identity
@@ -146,7 +145,7 @@ configuration ActiveDirectoryUsers
                 # if specified, add Credentials to perform the operation
                 if ($null -ne $Using:Credential)
                 {
-                    $Splatting.Credential = $Using:Credential 
+                    $Splatting.Credential = $Using:Credential
                 }
 
                 # set the group membership
@@ -164,8 +163,8 @@ configuration ActiveDirectoryUsers
             <#
                 Get the resource
             #>
-            GetScript  = { return 'NA' }
-            
+            GetScript  = { return @{ Result = 'N/A' } }
+
             # this resource depends on the created principal
             DependsOn  = "[$ExecutionType]$ExecutionName"
         } #end xScript
@@ -181,17 +180,17 @@ configuration ActiveDirectoryUsers
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -201,7 +200,7 @@ configuration ActiveDirectoryUsers
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -250,7 +249,7 @@ configuration ActiveDirectoryUsers
         {
             $u.Displayname = $u.UserName
         }
-        
+
 
         # set the Distinguished Name path of the Computer
         if ($u.Path)
@@ -260,7 +259,7 @@ configuration ActiveDirectoryUsers
         else
         {
             # otherwise, set the default Computer container
-            $u.Path = 'CN=Users,{0}' -f $DomainDN 
+            $u.Path = 'CN=Users,{0}' -f $DomainDN
         }
 
         # if note specified, set 'Country' to 'United States'
@@ -299,7 +298,7 @@ The DSC project can be found at https://prod1gitlab.mapcom.local/dsc/dsc-deploy.
         # it not specified, set 'Enabled'
         if (-not $u.ContainsKey('Enabled'))
         {
-            $u.Enabled = $true 
+            $u.Enabled = $true
         }
 
         # if not specified, set 'CannotChangePassword' to $false

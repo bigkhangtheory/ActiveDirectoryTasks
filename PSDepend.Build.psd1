@@ -12,7 +12,7 @@
     # -------------------------------------------------------------------------
     # PowerShell Modules
     # -------------------------------------------------------------------------
-    
+
     BuildHelpers                 = 'latest'
     # Helper functions for PowerShell CI/CD scenarios
 
@@ -48,17 +48,21 @@
 
     PSScriptAnalyzer             = 'latest'
     # Provides script analysis and checks for potential code defects in the scripts by applying a group of built-in or customized rules on the scripts being analyzed.
-    
+
     PSDeploy                     = 'latest'
     # Module to simplify PowerShell based deployments
+
+
+    'Indented.Net.Ip'            = '6.2.0'
+    # A collection of commands written to perform IPv4 subnet math.
 
     # -------------------------------------------------------------------------
     # DSC Resources
     # -------------------------------------------------------------------------
-    
+
     AccessControlDsc             = '1.4.1'
     # The AccessControlDsc module allows you to configure and manage access control on NTFS and Registry objects. It also allows management of audit access for Active Directory object SACL.
-    
+
     ActiveDirectoryDsc           = '6.0.1'
     # Contains DSC resources for deployment and configuration of Active Directory.
     # These DSC resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.

@@ -13,7 +13,6 @@
         Specify a list of Service Principal Names to register.
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectorySPNs
@@ -34,7 +33,7 @@ configuration ActiveDirectorySPNs
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
 
@@ -48,17 +47,17 @@ configuration ActiveDirectorySPNs
     <#
         Ensure required Windows Features
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -68,7 +67,7 @@ configuration ActiveDirectorySPNs
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"

@@ -3,53 +3,53 @@ configuration ActiveDirectoryDomain
     param
     (
         [Parameter(Mandatory)]
-        [string]
-        $DomainFQDN,
-
-        [Parameter(Mandatory)]
-        [string]
+        [System.String]
         $DomainName,
 
+        [Parameter(Mandatory)]
+        [System.String]
+        $DomainNetBiosName,
+
         [Parameter()]
-        [pscredential]
+        [System.Management.Automation.PSCredential]
         $DomainAdministrator,
 
         [Parameter()]
-        [pscredential]
+        [System.Management.Automation.PSCredential]
         $SafeModeAdministratorPassword,
 
         [Parameter()]
-        [string]
+        [System.String]
         $DatabasePath = 'C:\Windows\NTDS',
 
         [Parameter()]
-        [string]        
+        [System.String]
         $LogPath = 'C:\Windows\Logs',
 
         [Parameter()]
-        [string]
+        [System.String]
         $SysvolPath = 'C:\Windows\SYSVOL',
 
         [Parameter()]
-        [string]
+        [System.String]
         $ForestMode = 'WinThreshold',
 
         [Parameter()]
-        [boolean]
+        [System.Boolean]
         $ForceRebootBefore,
 
         [Parameter()]
-        [hashtable[]]
+        [System.Collections.Hashtable[]]
         $DomainTrusts,
 
         [Parameter()]
-        [boolean]
+        [System.Boolean]
         $EnablePrivilegedAccessManagement = $false
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
-        
+
     WindowsFeature ADDS
     {
         Name   = 'AD-Domain-Services'
@@ -62,7 +62,7 @@ configuration ActiveDirectoryDomain
         Ensure    = 'Present'
         DependsOn = '[WindowsFeature]ADDS'
     }
-    
+
     [string]$nextDependsOn = '[WindowsFeature]RSAT'
 
     if ($ForceRebootBefore -eq $true)
@@ -76,9 +76,9 @@ configuration ActiveDirectoryDomain
                 $val = Get-ItemProperty -Path $using:rebootKeyName -Name $using:rebootVarName -ErrorAction SilentlyContinue
 
                 if ($val -ne $null -and $val.$rebootVarName -gt 0)
-                { 
+                {
                     return $true
-                }   
+                }
                 return $false
             }
             SetScript  = {
@@ -87,19 +87,19 @@ configuration ActiveDirectoryDomain
                     New-Item -Path $using:rebootKeyName -Force
                 }
                 Set-ItemProperty -Path $rebootKeyName -Name $using:rebootVarName -Value 1
-                $global:DSCMachineStatus = 1             
+                $global:DSCMachineStatus = 1
             }
             GetScript  = { return @{result = 'result' } }
             DependsOn  = $nextDependsOn
-        }        
+        }
 
         $nextDependsOn = "[Script]$rebootVarName"
     }
 
     ADDomain $DomainName
     {
-        DomainName                    = $DomainFQDN
-        DomainNetbiosName             = $DomainName
+        DomainName                    = $DomainName
+        DomainNetbiosName             = $DomainNetBiosName
         SafemodeAdministratorPassword = $SafeModeAdministratorPassword
         Credential                    = $DomainAdministrator
         DatabasePath                  = $DatabasePath
@@ -116,8 +116,8 @@ configuration ActiveDirectoryDomain
         MembersToInclude = $(Split-Path -Path $DomainAdministrator.UserName -Leaf)
         DependsOn        = "[ADDomain]$DomainName"
     }
-    
-    ADOptionalFeature RecycleBinFeature 
+
+    ADOptionalFeature RecycleBinFeature
     {
         DependsOn                         = "[ADGroup]EnterpriseAdmins_$DomainName"
         ForestFQDN                        = $DomainFQDN
@@ -127,13 +127,13 @@ configuration ActiveDirectoryDomain
 
     if ( $EnablePrivilegedAccessManagement -eq $true )
     {
-        ADOptionalFeature PrivilegedAccessManagementFeature 
+        ADOptionalFeature PrivilegedAccessManagementFeature
         {
             DependsOn                         = "[ADGroup]EnterpriseAdmins_$DomainName"
             ForestFQDN                        = $DomainFQDN
             EnterpriseAdministratorCredential = $DomainAdministrator
             FeatureName                       = 'Privileged Access Management Feature'
-        }  
+        }
     }
 
     foreach ($trust in $DomainTrusts)
@@ -146,7 +146,7 @@ configuration ActiveDirectoryDomain
 
         ADDomainTrust $trust.Name
         {
-            SourceDomainName = $DomainName
+            SourceDomainName = $DomainNetBiosName
             TargetCredential = $trust.Credential
             TargetDomainName = $trust.Fqdn
             TrustDirection   = 'Bidirectional'

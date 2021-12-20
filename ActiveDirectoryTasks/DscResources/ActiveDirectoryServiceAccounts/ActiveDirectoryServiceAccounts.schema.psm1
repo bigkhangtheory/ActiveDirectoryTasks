@@ -16,7 +16,6 @@
         Created:    2021-08-29
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectoryServiceAccounts
@@ -53,7 +52,7 @@ configuration ActiveDirectoryServiceAccounts
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -96,7 +95,7 @@ configuration ActiveDirectoryServiceAccounts
         <#
             Create DSC xScript resource
         #>
-        xScript "$($ExecutionName)_MemberOf"
+        Script "$($ExecutionName)_MemberOf"
         {
             <#
                 Test the resource
@@ -176,7 +175,7 @@ configuration ActiveDirectoryServiceAccounts
             <#
                 Get the resource
             #>
-            GetScript  = { return 'NA' }
+            GetScript  = { return @{ Result = 'N/A' } }
 
             # this resource depends on the created principal
             DependsOn  = "[$ExecutionType]$ExecutionName"
@@ -193,17 +192,17 @@ configuration ActiveDirectoryServiceAccounts
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -213,7 +212,7 @@ configuration ActiveDirectoryServiceAccounts
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"

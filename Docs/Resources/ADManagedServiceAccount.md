@@ -1,0 +1,132 @@
+﻿# ADManagedServiceAccount
+
+## Parameters
+
+| Parameter                     | Attribute  | DataType         | Description                                                                                                                                                                                                                                                                                            | Allowed Values                                           |
+| ----------------------------- | ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| **ServiceAccountName**        | *Required* | `[String]`       | Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created, the user's SamAccountName and CN cannot be changed. |                                                          |
+| **AccountType**               | Required   | `[String]`       | The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and Group will create a Group Managed Service Account (gMSA).                                                                                                                                  | Group, Standalone                                        |
+| **Credential**                | *Optional* | `[PSCredential]` | Specifies the user account credentials to use to perform this task. This is only required if not executing the task on a domain controller or using the parameter DomainController.                                                                                                                    |                                                          |
+| **Description**               | *Optional* | `[String]`       | Specifies the description of the account (ldapDisplayName 'description').                                                                                                                                                                                                                              |                                                          |
+| **DisplayName**               | *Optional* | `[String]`       | Specifies the display name of the account (ldapDisplayName 'displayName').                                                                                                                                                                                                                             |                                                          |
+| **DomainController**          | *Optional* | `[String]`       | Specifies the Active Directory Domain Controller instance to use to perform the task. This is only required if not executing the task on a domain controller.                                                                                                                                          |                                                          |
+| **Ensure**                    | *Optional* | `[String]`       | Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.                                                                                                                                                                                            | Present, Absent                                          |
+| **KerberosEncryptionType**    | *Optional* | `[String[]]`     | Specifies which Kerberos encryption types the account supports when creating service tickets. This value sets the encryption types supported flags of the Active Directory msDS-SupportedEncryptionTypes attribute.                                                                                    | None, RC4, AES128, AES256                                |
+| **ManagedPasswordPrincipals** | *Optional* | `[String[]]`     | Specifies the membership policy for systems which can use a group managed service account. (ldapDisplayName 'msDS-GroupMSAMembership'). Only used when 'Group' is selected for 'AccountType'.                                                                                                          |                                                          |
+| **MembershipAttribute**       | *Optional* | `[String]`       | Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSA). If not specified, this value defaults to SamAccountName.                                                                                                                                   | SamAccountName, DistinguishedName, ObjectGUID, ObjectSid |
+| **Path**                      | *Optional* | `[String]`       | Specifies the X.500 path of the Organizational Unit (OU) or container where the new account is created. Specified as a Distinguished Name (DN).                                                                                                                                                        |                                                          |
+| **Enabled**                   | Read       | `[Boolean]`      | Returns whether the user account is enabled or disabled.                                                                                                                                                                                                                                               |                                                          |
+| **DistinguishedName**         | Read       | `[String]`       | Returns the Distinguished Name of the Service Account.                                                                                                                                                                                                                                                 |                                                          |
+
+## Description
+
+The ADManagedServiceAccount DSC resource will manage Single and Group Managed Service Accounts (MSAs) within Active Directory. A Managed Service Account is a managed domain account that provides automatic password management, simplified service principal name (SPN) management and the ability to delegate management to other administrators.
+A Single Managed Service Account can only be used on a single computer, whereas a Group Managed Service Account can be shared across multiple computers.
+
+## Requirements
+
+* Target machine must be running Windows Server 2008 R2 or later.
+* Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller.
+
+## Examples
+
+### Example 1
+
+This configuration will create a standalone managed service account in the default 'Managed Service Accounts'
+container.
+
+```powershell
+Configuration ADManagedServiceAccount_CreateManagedServiceAccount_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        ADManagedServiceAccount 'ExampleStandaloneMSA'
+        {
+            Ensure             = 'Present'
+            ServiceAccountName = 'Service01'
+            AccountType        = 'Standalone'
+        }
+    }
+}
+```
+
+### Example 2
+
+This configuration will create a group managed service account in the default 'Managed Service Accounts'
+container.
+
+```powershell
+Configuration ADManagedServiceAccount_CreateGroupManagedServiceAccount_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        ADManagedServiceAccount 'ExampleGroupMSA'
+        {
+            Ensure             = 'Present'
+            ServiceAccountName = 'Service01'
+            AccountType        = 'Group'
+        }
+    }
+}
+```
+
+### Example 3
+
+This configuration will create a group managed service account with members in the default 'Managed Service
+Accounts' container.
+
+```powershell
+Configuration ADManagedServiceAccount_CreateGroupManagedServiceAccountWithMembers_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        ADManagedServiceAccount 'AddingMembersUsingSamAccountName'
+        {
+            Ensure                    = 'Present'
+            ServiceAccountName        = 'Service01'
+            AccountType               = 'Group'
+            ManagedPasswordPrincipals = 'User01', 'Computer01$'
+        }
+
+        ADManagedServiceAccount 'AddingMembersUsingDN'
+        {
+            Ensure                    = 'Present'
+            ServiceAccountName        = 'Service02'
+            AccountType               = 'Group'
+            ManagedPasswordPrincipals = 'CN=User01,OU=Users,DC=contoso,DC=com', 'CN=Computer01,OU=Computers,DC=contoso,DC=com'
+        }
+    }
+}
+```
+
+### Example 4
+
+This configuration will create a group managed service account in the specified path.
+
+```powershell
+Configuration ADManagedServiceAccount_CreateGroupManagedServiceAccountCustomPath_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        Node localhost
+        {
+            ADManagedServiceAccount 'ExampleGroupMSA'
+            {
+                Ensure             = 'Present'
+                ServiceAccountName = 'Service01'
+                AccountType        = 'Group'
+                Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
+            }
+        }
+    }
+}
+```
+

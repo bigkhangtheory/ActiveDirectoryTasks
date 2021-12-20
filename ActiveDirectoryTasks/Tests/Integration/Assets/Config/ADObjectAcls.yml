@@ -1,0 +1,37 @@
+DomainDN: DC=example,DC=com
+Objects:
+  - Path: CN=Account Operators,CN=Builtin
+    AccessControlList:
+      # ---
+      - IdentityReference: MAPCOM\Group Membership Operators
+        PermissionEntries:
+          # ---
+          - AccessControlType: Allow
+            ActiveDirectoryRights:
+              - GenericRead
+              - GenericExecute
+            ObjectType: Group
+
+          # ---
+          - AccessControlType: Allow
+            ActiveDirectoryRights:
+              - ExtendedRight
+            ObjectType: Membership
+  # ---
+  - Path: CN=DnsAdmins,CN=Users
+    AccessControlList:
+      # ---
+      - IdentityReference: MAPCOM\Group Membership Operators
+        PermissionEntries:
+          # ---
+          - AccessControlType: Allow
+            ActiveDirectoryRights:
+              - GenericRead
+              - GenericExecute
+            ObjectType: Group
+
+          # ---
+          - AccessControlType: Allow
+            ActiveDirectoryRights:
+              - ExtendedRight
+            ObjectType: Membership

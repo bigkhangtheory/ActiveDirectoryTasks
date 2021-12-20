@@ -27,7 +27,7 @@ configuration ADOrganizationalUnitAcls
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     <#
@@ -39,17 +39,17 @@ configuration ADOrganizationalUnitAcls
     <#
         Wait for Active Directory domain controller to become available in the domain
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -59,7 +59,7 @@ configuration ADOrganizationalUnitAcls
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $script:dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -1973,29 +1973,15 @@ configuration ADOrganizationalUnitAcls
         # set OU path as DN
         $objectPath = 'OU={0},{1}' -f $Object.Name, $ParentPath
 
-        Write-Verbose -Message ' '
-        Write-Verbose -Message '***********************'
-        Write-Verbose -Message "Index is $script:index"
-        Write-Verbose -Message '***********************'
-        Write-Verbose -Message ' '
 
         <#
             Recursive condition
         #>
         if (($null -ne $Object.ChildPath) -and ($Object.ChildPath.Count -gt 0))
         {
-            Write-Verbose -Message "ObjectPath [$objectPath] has $($Object.ChildPath.Count) child paths."
 
             foreach ($path in $Object.ChildPath)
             {
-                Write-Verbose -Message "Enumerating the child path $($path.Name)"
-                $parameters = @"
-Splatting = {
-    Object     = $($path.Name)
-    ParentPath = $objectPath
-    Verbose    = true
-}
-"@
                 # splat parameters
                 $Splatting = @{
                     Object     = $path
@@ -2003,97 +1989,64 @@ Splatting = {
                     Verbose    = $true
                 }
 
-                Write-Verbose -Message 'Calling Get-ObjectPathSplat with the following parameters:'
-                Write-Verbose -Message $parameters
-
                 try
                 {
                     Get-ObjectPathSplat @Splatting
                 }
                 catch
                 {
-                    Write-Verbose -Message 'Failed to invoke Get-ObjectPathSplat with parameter:'
-                    Write-Verbose -Message $parameters
                     throw "$($_.Exception.Message)"
                 }
             }
         } #end recursive condition
 
-        Write-Verbose '------------------'
-        Write-Verbose "Object Path = $($objectPath)"
-        Write-Verbose '------------------'
 
         if ($Object.AccessControlList)
         {
-            Write-Verbose "[$($Object.Name)] - AccessControlList is found."
 
 
             foreach ($a in $Object.AccessControlList)
             {
-                Write-Verbose "[$($Object.Name)] - IdentityReference is [$($a.IdentityReference)]"
 
                 # index for entries
                 $index = 0
 
                 foreach ($e in $a.PermissionEntries)
                 {
-                    Write-Verbose "[$($Object.Name)] - PermissionEntry is found."
 
                     # remove case sensitivity for ordered Dictionary and Hashtabels
                     $e = @{ } + $e
 
-                    Write-Verbose "[$($Object.Name)] - AccessControlType is [$($e.AccessControlType)]"
 
                     # if not specified, set 'ActiveDirectoryRights' to 'GenericAll'
                     if (-not $e.ContainsKey('ActiveDirectoryRights'))
                     {
-                        Write-Verbose "[$($Object.Name)] - ActiveDirectoryRights is not found, setting default value of [All]."
                         $e.ActiveDirectoryRights = 'All'
-                    }
-                    else
-                    {
-                        Write-Verbose "[$($Object.Name)] - ActiveDirectoryRights is [$($e.ActiveDirectoryRights)]"
                     }
 
 
                     # if not specified, set 'ObjectType' to All
                     if (-not $e.ContainsKey('ObjectType'))
                     {
-                        Write-Verbose "[$($Object.Name)] - ObjectType is not found, setting Defaults."
                         $e.ObjectType = 'All'
-                    }
-                    else
-                    {
-                        Write-Verbose "[$($Object.Name)] - ObjectType is [$($e.ObjectType)]"
                     }
 
                     # if not specified, set 'ActiveDirectorySecurityInheritance' to All
                     if (-not $e.ContainsKey('ActiveDirectorySecurityInheritance'))
                     {
-                        Write-Verbose "[$($Object.Name)] - ActiveDirectorySecurityInheritance is not found, setting Defaults."
                         $e.ActiveDirectorySecurityInheritance = 'All'
-                    }
-                    else
-                    {
-                        Write-Verbose "[$($Object.Name)] - ActiveDirectorySecurityInheritance is [$($e.ActiveDirectorySecurityInheritance)]"
                     }
 
                     # if not specified, set 'ObjectType' to zero GUID
                     if (-not $e.ContainsKey('InheritedObjectType'))
                     {
-                        Write-Verbose "[$($Object.Name)] - InheritedObjectType is not found, setting Defaults."
                         $e.InheritedObjectType = 'All'
-                    }
-                    else
-                    {
-                        Write-Verbose "[$($Object.Name)] - InheritedObjectType is [$($e.InheritedObjectType)]"
                     }
 
 
                     # if not specified, ensure 'Present'
                     if (-not $e.ContainsKey('Ensure'))
                     {
-                        Write-Verbose "[$($Object.Name)] - Not found Ensure, setting Present."
                         $e.Ensure = 'Present'
                     }
 
@@ -2101,11 +2054,9 @@ Splatting = {
                     try
                     {
                         $objectType = (Get-SchemaObjectGuid -ObjectName $e.ObjectType -Verbose)
-                        Write-Verbose "[$($Object.Name)] - ObjectType Schema GUID is $objectType"
                     }
                     catch
                     {
-                        Write-Verbose -Message "Failed to resolve Schema GUID of ObjectType $($e.ObjectType)."
                         throw "$($_.Exception.Message)"
                     }
 
@@ -2113,11 +2064,9 @@ Splatting = {
                     try
                     {
                         $inheritedObjectType = (Get-SchemaObjectGuid -ObjectName $e.InheritedObjectType -Verbose)
-                        Write-Verbose "[$($Object.Name)] - InheritedObjectType Schema GUID is $inheritedObjectType"
                     }
                     catch
                     {
-                        Write-Verbose -Message "Failed to resolve Schema GUID of InheritedObjectType $($e.InheritedObjectType)."
                         throw "$($_.Exception.Message)"
                     }
 
@@ -2129,22 +2078,22 @@ Splatting = {
 
                     $hashtable = @"
 
-    ADObjectPermissionEntry "$executionName"
-    {
-        Ensure                             = $($e.Ensure)
-        Path                               = $($objectPath)
-        IdentityReference                  = $($a.IdentityReference)
-        ActiveDirectoryRights              = $($activeDirectoryRights)
-        AccessControlType                  = $($e.AccessControlType)
-        ObjectType                         = $($objectType)
-        ActiveDirectorySecurityInheritance = $($e.ActiveDirectorySecurityInheritance)
-        InheritedObjectType                = $($inheritedObjectType)
-    }
+                    ADObjectPermissionEntry "$executionName"
+                    {
+                        Ensure                             = $($e.Ensure)
+                        Path                               = $($objectPath)
+                        IdentityReference                  = $($a.IdentityReference)
+                        ActiveDirectoryRights              = $($activeDirectoryRights)
+                        AccessControlType                  = $($e.AccessControlType)
+                        ObjectType                         = $($objectType)
+                        ActiveDirectorySecurityInheritance = $($e.ActiveDirectorySecurityInheritance)
+                        InheritedObjectType                = $($inheritedObjectType)
+                    }
 
 "@
 
-                    Write-Verbose "[$($Object.Name)] - Creating ADObjectPermissionEntry resource with the following properties:"
-                    Write-Verbose $hashtable
+                    Write-Host $hashtable -ForegroundColor Yellow
+
                     try
                     {
                         # create array for ActiveDirectoryRights
@@ -2166,22 +2115,13 @@ Splatting = {
                     }
                     catch
                     {
-                        Write-Verbose -Message 'Failed in create DSC Resource for ADObjectPermissionEntry'
                         throw "$($_.Exception.Message)"
-                    }
-                    finally
-                    {
-                        Write-Verbose "[$($Object.Name)] - Creating DSC Resource completed."
                     }
 
                     # increment index
                     $index++
                 } #end foreach ($e in $a.PermissionEntries)
             } #end foreach ($a in $Object.AccessControlList)
-        }
-        else
-        {
-            Write-Verbose "[$($Object.Name)] - NOT Found [AccessControlList]... SKIPPING."
         }
     } #end function
 
@@ -2210,11 +2150,6 @@ Splatting = {
             SkipDepend = $true
             Verbose    = $true
         }
-        Write-Verbose -Message '***********************'
-        Write-Verbose -Message "Index is $script:index"
-        Write-Verbose -Message '***********************'
-        Write-Verbose -Message "ParentPath is $($p.Path)"
-        Write-Verbose -Message "Object.Name is $($p.Name)"
 
         Get-ObjectPathSplat @Splatting
     } #end foreach

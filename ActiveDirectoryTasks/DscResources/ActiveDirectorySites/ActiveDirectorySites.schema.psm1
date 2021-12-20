@@ -9,12 +9,11 @@
         Specifies a list of named Site Subnets to create within Active Directory.
 #>
 #Requires -Module ActiveDirectoryDsc
-#Requires -Module xPSDesiredStateConfiguration
 
 
 configuration ActiveDirectorySites
 {
-    param 
+    param
     (
         [Parameter(Mandatory)]
         [ValidatePattern('^((DC=[^,]+,?)+)$')]
@@ -40,7 +39,7 @@ configuration ActiveDirectorySites
     <#
         Import required modules
     #>
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
 
@@ -53,17 +52,17 @@ configuration ActiveDirectorySites
     <#
         Ensure required Windows Features
     #>
-    xWindowsFeature AddAdDomainServices
+    WindowsFeature AddAdDomainServices
     {
         Name   = 'AD-Domain-Services'
         Ensure = 'Present'
     }
 
-    xWindowsFeature AddRSATADPowerShell
+    WindowsFeature AddRSATADPowerShell
     {
         Name      = 'RSAT-AD-PowerShell'
         Ensure    = 'Present'
-        DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        DependsOn = '[WindowsFeature]AddAdDomainServices'
     }
 
     # set execution name for the resource
@@ -73,7 +72,7 @@ configuration ActiveDirectorySites
     {
         DomainName  = $myDomainName
         WaitTimeout = 300
-        DependsOn   = '[xWindowsFeature]AddRSATADPowershell'
+        DependsOn   = '[WindowsFeature]AddRSATADPowershell'
     }
     # set resource name as dependency
     $dependsOnWaitForADDomain = "[WaitForADDomain]$executionName"
@@ -97,7 +96,7 @@ configuration ActiveDirectorySites
         }
 
         # this resource depends on Active Directory
-        $s.DependsOn = '[xWindowsFeature]AddAdDomainServices'
+        $s.DependsOn = '[WindowsFeature]AddAdDomainServices'
 
         # create execution name for the resource
         $executionName = "$($s.Name -replace '[-().:\s]', '_')"
@@ -129,13 +128,13 @@ configuration ActiveDirectorySites
         {
             $l.Ensure = 'Present'
         }
-        
+
         # this resource depends on Active Directory Sites
         $l.DependsOn = $dependsOnAdReplicationSites
-        
+
         # create execution name for the resource
         $executionName = "$($l.Name -replace '[-().:\s]', '_')"
-        
+
         # create DSC resource
         $Splatting = @{
             ResourceName  = 'ADReplicationSiteLink'
@@ -160,13 +159,13 @@ configuration ActiveDirectorySites
         {
             $n.Ensure = 'Present'
         }
-        
+
         # this resource depends on Active Directory Sites
         $n.DependsOn = $dependsOnAdReplicationSites
-        
+
         # create execution name for the resource
         $executionName = "$($n.Name -replace '[-().:/\s]', '_')"
-        
+
         # create DSC resource
         $Splatting = @{
             ResourceName  = 'ADReplicationSubnet'
