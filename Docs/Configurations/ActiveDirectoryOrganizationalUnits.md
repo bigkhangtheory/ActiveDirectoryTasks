@@ -1,6 +1,8 @@
 # ActiveDirectoryOrganizationalUnits
 
-This DSC configuration manages Organizational Units (OUs) within Active Directory in a hierachical structure.
+The **ActiveDirectoryOrganizationalUnits** DSC configuration manages Organizational Units (OUs) within Active Directory in a hierachical structure.
+
+An OU is a subdivision within an Active Directory into which you can place users, groups, computers, and other organizational units.
 
 <br />
 
@@ -10,7 +12,7 @@ This DSC configuration manages Organizational Units (OUs) within Active Director
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Source**       | https://github.com/bigkhangtheory/ActiveDirectoryTasks/tree/master/ActiveDirectoryTasks/DscResources/ActiveDirectoryOrganizationalUnits |
 | **Dependencies** | [ActiveDirectoryDsc][ActiveDirectoryDsc], [xPSDesiredStateConfiguration][xPSDesiredStateConfiguration]                                  |
-| **Resources**    | [xWindowsFeature][xWindowsFeature]                                                                                                      |
+| **Resources**    | [ADOrganizationalUnit][ADOrganizationalUnit], [xWindowsFeature][xWindowsFeature]                                                        |
 
 <br />
 
@@ -20,10 +22,22 @@ This DSC configuration manages Organizational Units (OUs) within Active Director
 
 ### Table. Attributes of `ActiveDirectoryOrganizationalUnits`
 
-| Parameter    | Attribute  | DataType   | Description                            | Allowed Values |
-| :----------- | :--------- | :--------- | :------------------------------------- | :------------- |
-| **DomainDn** | *Required* | `[String]` | Distinguished Name (DN) of the domain. |                |
+| Parameter    | Attribute  | DataType        | Description                                                | Allowed Values |
+| :----------- | :--------- | :-------------- | :--------------------------------------------------------- | :------------- |
+| **DomainDn** | *Required* | `[String]`      | Distinguished Name (DN) of the domain.                     |                |
+| **OUs**      | *Required* | `[Hashtable[]]` | List of Organizational Units (OUs) within Active Directory |                |
 
+---
+
+<br />
+
+### Table. Attributes of `OUs`
+
+| Parameter       | Attribute  | DataType        | Description                                                                                    | Allowed Values |
+| :-------------- | :--------- | :-------------- | :--------------------------------------------------------------------------------------------- | :------------- |
+| **Name**        | *Required* | `[String]`      | The name of the Organizational Unit (OU).                                                      |                |
+| **Description** |            | `[String]`      | Specify a description to be included for the OU with Active Directory. Defaults to `DomainDN`. |                |
+| **ChildOu**     |            | `[Hashtable[]]` | List of Child Organizational Units. For each Child OU the parameter Name must be specified.    |                |
 
 ---
 
@@ -33,7 +47,7 @@ This DSC configuration manages Organizational Units (OUs) within Active Director
 
 ```yaml
 ActiveDirectoryOrganizationalUnits:
-  DomainDN: DC=mapcom,DC=local
+  DomainDN: DC=example,DC=com
   OUs:
     - Name: Enterprise
       Description: This Organizational Unit contains all company Enterprise objects.
@@ -42,15 +56,12 @@ ActiveDirectoryOrganizationalUnits:
           ChildOu:
             - Name: Desktops
               ChildOu:
-                - Name: IT
+                - Name: Privileged
                   ChildOu:
-                    - Name: Domain
-                    - Name: Privileged
+                    - Name: IT
+                    - Name: Development
                     - Name: Remote
                 - Name: Operations
-                  ChildOu:
-                    - Name: Admin
-                    - Name: Agent
             - Name: Servers
               ChildOu:
                 - Name: Linux
@@ -67,16 +78,16 @@ ActiveDirectoryOrganizationalUnits:
                     - Name: WSUS
         - Name: Groups
           ChildOu:
-            - Name: Resource
+            - Name: Privileged
               ChildOu:
-                - Name: IT
-                - Name: Linux
-                - Name: Operations
-            - Name: Roles
+                - Name: Resources
+                - Name: Roles
+                - Name: Tiers
+            - Name: Business
               ChildOu:
-                - Name: IT
-                - Name: Linux
-                - Name: Operations
+                - Name: Admins
+                - Name: Staff
+                - Name: VPs
         - Name: Users
 ```
 
@@ -89,7 +100,12 @@ lookup_options:
 
   ActiveDirectoryOrganizationalUnits:
     merge_hash: deep
-
+  ActiveDirectoryOrganizationalUnits:
+    merge_baseType_array: Unique
+    merge_hash_array: DeepTuple
+    merge_options:
+      tuple_keys:
+        - Name
 ```
 
 <br />

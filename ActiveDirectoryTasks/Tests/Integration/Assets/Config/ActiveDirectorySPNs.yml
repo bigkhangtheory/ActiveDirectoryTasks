@@ -2,9 +2,9 @@
 # SPNs are used by Kerberos authentication to associate a service instance with a service logon account.
 # This allows a client application to request that the service authenticate an account even if the client does not have the account name.
 DomainDN: DC=example,DC=com
-SPNs:
+ServicePrincipalNames:
   - ServicePrincipalName: MSSQLSvc/sql01.example.com:1433
     Account: svc_mssql
-    Ensure:   Present
+    Ensure: Present
   - ServicePrincipalName: HTTP/web.example.com
     Account: WEBSERVER01$

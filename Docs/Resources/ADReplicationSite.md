@@ -4,10 +4,10 @@
 
 | Parameter                      | Attribute  | DataType    | Description                                                                                                                                                                                  | Allowed Values  |
 | ------------------------------ | ---------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| **Ensure**                     | *Optional* | `[String]`  | Specifies if the Active Directory replication site should be present or absent. Default value is 'Present'.                                                                                  | Present, Absent |
+| **Ensure**                     |            | `[String]`  | Specifies if the Active Directory replication site should be present or absent. Default value is 'Present'.                                                                                  | Present, Absent |
 | **Name**                       | *Required* | `[String]`  | Specifies the name of the Active Directory replication site.                                                                                                                                 |                 |
-| **RenameDefaultFirstSiteName** | *Optional* | `[Boolean]` | Specifies if the Default-First-Site-Name should be renamed if it exists. Default value is $false.                                                                                            |                 |
-| **Description**                | *Optional* | `[String]`  | Specifies a description of the object. This parameter sets the value of the Description property for the object. The LDAP Display Name (ldapDisplayName) for this property is 'description'. |                 |
+| **RenameDefaultFirstSiteName** |            | `[Boolean]` | Specifies if the Default-First-Site-Name should be renamed if it exists. Default value is $false.                                                                                            |                 |
+| **Description**                |            | `[String]`  | Specifies a description of the object. This parameter sets the value of the Description property for the object. The LDAP Display Name (ldapDisplayName) for this property is 'description'. |                 |
 
 ## Description
 

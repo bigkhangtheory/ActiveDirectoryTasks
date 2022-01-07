@@ -9,8 +9,11 @@
         This allows a client application to request that the service authenticate an account even if the client does not have the account name.
     .PARAMETER DomainDN
         Distinguished Name (DN) of the domain.
-    .PARAMETER SPNs
+    .PARAMETER ServicePrincipalNames
         Specify a list of Service Principal Names to register.
+    .NOTES
+        Khang M. Nguyen
+        @bigkhangtheory
 #>
 #Requires -Module ActiveDirectoryDsc
 
@@ -27,7 +30,7 @@ configuration ActiveDirectorySPNs
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable[]]
-        $SPNs
+        $ServicePrincipalNames
     )
 
     <#

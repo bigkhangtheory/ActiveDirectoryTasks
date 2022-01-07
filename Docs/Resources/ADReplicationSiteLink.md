@@ -5,15 +5,15 @@
 | Parameter                         | Attribute  | DataType     | Description                                                                                                       | Allowed Values  |
 | --------------------------------- | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------- | --------------- |
 | **Name**                          | *Required* | `[String]`   | Specifies the name of the site link.                                                                              |                 |
-| **Cost**                          | *Optional* | SInt32       | Specifies the cost to be placed on the site link.                                                                 |                 |
-| **Description**                   | *Optional* | `[String]`   | This parameter sets the value of the Description property for the object.                                         |                 |
-| **ReplicationFrequencyInMinutes** | *Optional* | SInt32       | Species the frequency (in minutes) for which replication will occur where this site link is in use between sites. |                 |
-| **SitesIncluded**                 | *Optional* | `[String[]]` | Specifies the list of sites included in the site link.                                                            |                 |
-| **SitesExcluded**                 | *Optional* | `[String[]]` | Specifies the list of sites to exclude from the site link.                                                        |                 |
-| **Ensure**                        | *Optional* | `[String]`   | Specifies if the site link should be present or absent. Default value is 'Present'.                               | Present, Absent |
-| **OptionChangeNotification**      | *Optional* | `[Boolean]`  | Enables or disables Change Notification Replication on a site link. Default value is $false.                      |                 |
-| **OptionTwoWaySync**              | *Optional* | `[Boolean]`  | Enables or disables Two Way Sync on a site link. Default value is $false.                                         |                 |
-| **OptionDisableCompression**      | *Optional* | `[Boolean]`  | Enables or disables Compression on a site link. Default value is $false.                                          |                 |
+| **Cost**                          |            | SInt32       | Specifies the cost to be placed on the site link.                                                                 |                 |
+| **Description**                   |            | `[String]`   | This parameter sets the value of the Description property for the object.                                         |                 |
+| **ReplicationFrequencyInMinutes** |            | SInt32       | Species the frequency (in minutes) for which replication will occur where this site link is in use between sites. |                 |
+| **SitesIncluded**                 |            | `[String[]]` | Specifies the list of sites included in the site link.                                                            |                 |
+| **SitesExcluded**                 |            | `[String[]]` | Specifies the list of sites to exclude from the site link.                                                        |                 |
+| **Ensure**                        |            | `[String]`   | Specifies if the site link should be present or absent. Default value is 'Present'.                               | Present, Absent |
+| **OptionChangeNotification**      |            | `[Boolean]`  | Enables or disables Change Notification Replication on a site link. Default value is $false.                      |                 |
+| **OptionTwoWaySync**              |            | `[Boolean]`  | Enables or disables Two Way Sync on a site link. Default value is $false.                                         |                 |
+| **OptionDisableCompression**      |            | `[Boolean]`  | Enables or disables Compression on a site link. Default value is $false.                                          |                 |
 
 ## Description
 

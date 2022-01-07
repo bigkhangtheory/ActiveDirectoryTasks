@@ -1,187 +1,124 @@
 # ActiveDirectoryTasks
 
-This repo provides a structured project for building re-usable and composable **DSC Configurations** _(DSC Composite Resources.md)_ used to manage and configuration **Active Diretory Domain Services**.
+This repo provides a structured project for building re-usable and composable **DSC Configurations** used to manage and configure **Active Diretory Domain Services**, including Users, Groups, Organizational Units (OUs), and services and sites.
+
+Desired State Configuration (DSC) is a declarative management platform in PowerShell to configure, deploy, and manage systems.
+
+If you are new to DSC, configurations, or resources, you can learn more about them [here](https://docs.microsoft.com/en-us/powershell/scripting/dsc/overview/overview).
+
+## Project Overview
+
+This project aims to simplify and allow direct re-use of shared **DSC configurations** in new environments by:
+
+- Providing a scaffolding project structure similar to PowerShell modules.
+- Creating a self-contained model by declaring and pulling project dependencies from a repository.
+- Pre-defining sane default Configuration Data within the DSC Configuration functions.
 
 ---
 
-## Project Configurations *(Composite Resources.md)*
+## Project Releases
 
-| **Configurations**                                                                                | **Description**                                                                                                            | **Status**  |
-| :------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------- | :---------: |
-| [ActiveDirectoryComputers](./Docs/Configurations/ActiveDirectoryComputers.md)                     | This DSC configuration creates and manages Computer objects within Active Directory.                                       | *Published* |
-| [ActiveDirectoryDistributionGroups](./Docs/Configurations/ActiveDirectoryDistributionGroups.md)   | This DSC configuration manages Distribution Groups within Active Directory.                                                | *Published* |
-| [ActiveDirectoryDomain](./Docs/Configurations/ActiveDirectoryDomain)                              | This DSC configuration creates a new domain in a new forest or a child domain in an existing forest.                       | *Published* |
-| [ActiveDirectoryDomainController](./Docs/Configurations/ActiveDirectoryDomainController)          | This DSC configuration will install and configure domain controllers in Active Directory.                                  | *Published* |
-| [ActiveDirectoryFunctionalLevel](./Docs/Configurations/ActiveDirectoryFunctionalLevel)            | This DSC configuration manages to functional level of a Domain and/or Forest within Active Directory.                      | *Published* |
-| [ActiveDirectoryGroups](./Docs/Configurations/ActiveDirectoryGroups.md)                           | This DSC configuration manages Security Groups and memberships within Active Directory.                                    | *Published* |
-| [ActiveDirectoryOrganizationalUnits](./Docs/Configurations/ActiveDirectoryOrganizationalUnits.md) | This DSC configuration manage Organizational Units (OUs) within Active Directory.                                          | *Published* |
-| [ActiveDirectoryServiceAccounts](./Docs/Configurations/ActiveDirectoryServiceAccounts.md)         | This DSC configuration is used to manage and configure service logon accounts within Active Directory.                     | *Published* |
-| [ActiveDirectorySites](./Docs/Configurations/ActiveDirectorySites.md)                             | This DSC configuration managed Replication Sites, Replication Site Links, and Replication Subnets within Active Directory. | *Published* |
-| [ActiveDirectorySPNs](./Docs/Configurations/ActiveDirectorySPNs.md)                               | This DSC configuration is used to manage and Service Principal Names within Active Directory.                              | *Published* |
-| [ActiveDirectoryUsers](./Docs/Configurations/ActiveDirectoryUsers.md)                             | This DSC configuration creates and manages User objects within Active Directory.                                           | *Published* |
-| [ADOrganizationalUnitAcls](./Docs/Configurations/ADOrganizationalUnitAcls.md)                     | This DSC configuration is used to managed access control lists on Active Directory Organizational Units (OUs.md).          | *Published* |
-| [ConfigurationContainerAcls](./Docs/Configurations/ConfigurationContainerAcls.md)                 | This DSC configuration is used to managed access control lists on Active Directory Configuration Container objects.        | *Published* |
-| [DomainDefaultPasswordPolicy](./Docs/Configurations/DomainDefaultPasswordPolicy)                  | This DSC configuration manage an Active Directory domains default password policy.                                         | *Published* |
-| [DomainTrusts](./Docs/Configurations/DomainTrusts.md)                                             | This DSC configuration manages Domain Trusts within Active Directory.                                                      | *Published* |
-| [ForestServicePrincipalNames](./Docs/Configurations/ForestServicePrincipalNames.md)               | This DSC configuration manages the addition of supported Service Principal Names within an Active Directory Forest.        | *Published* |
-| [ForestUserPrincipalNames](./Docs/Configurations/ForestUserPrincipalNames.md)                     | This DSC configuration will manage forest wide User Principal Name (UPN) suffixes within Active Directory.                 | *Published* |
-| [NodeGroupMemberships](./Docs/Configurations/NodeGroupMemberships.md)                             | This DSC configuration is used to enroll a target node within a defined Active Directory security group.                   | *Published* |
-| [ProtectFromAccidentalDeletion](./Docs/Configurations/ProtectFromAccidentalDeletion.md)           | This DSC configuration prevents AD objects from being deleted.                                                             | *Published* |
+The following **DSC configurations** are made available by this project.
+
+| Configurations                                                                                    | Description                                                                                        |
+| :------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------- |
+| [ActiveDirectoryComputers](./Docs/Configurations/ActiveDirectoryComputers.md)                     | Creates and manages Computer objects within Active Directory.                                      |
+| [ActiveDirectoryDistributionGroups](./Docs/Configurations/ActiveDirectoryDistributionGroups.md)   | Manages Distribution Groups within Active Directory.                                               |
+| [ActiveDirectoryDomain](./Docs/Configurations/ActiveDirectoryDomain)                              | Creates a new domain in a new forest or a child domain in an existing forest.                      |
+| [ActiveDirectoryDomainController](./Docs/Configurations/ActiveDirectoryDomainController)          | Will install and configure domain controllers in Active Directory.                                 |
+| [ActiveDirectoryFunctionalLevel](./Docs/Configurations/ActiveDirectoryFunctionalLevel)            | Manages to functional level of a Domain and/or Forest within Active Directory.                     |
+| [ActiveDirectoryGroups](./Docs/Configurations/ActiveDirectoryGroups.md)                           | Manages Security Groups and memberships within Active Directory.                                   |
+| [ActiveDirectoryOrganizationalUnits](./Docs/Configurations/ActiveDirectoryOrganizationalUnits.md) | Creates and manages Organizational Units (OUs) within Active Directory.                            |
+| [ActiveDirectoryServiceAccounts](./Docs/Configurations/ActiveDirectoryServiceAccounts.md)         | Manage and configure service logon accounts within Active Directory.                               |
+| [ActiveDirectorySites](./Docs/Configurations/ActiveDirectorySites.md)                             | Manage Replication Sites, Replication Site Links, and Replication Subnets within Active Directory. |
+| [ActiveDirectorySPNs](./Docs/Configurations/ActiveDirectorySPNs.md)                               | Creates and manages Service Principal Names within Active Directory.                               |
+| [ActiveDirectoryUsers](./Docs/Configurations/ActiveDirectoryUsers.md)                             | Creates and manages User objects within Active Directory.                                          |
+| [ADOrganizationalUnitAcls](./Docs/Configurations/ADOrganizationalUnitAcls.md)                     | Manage access control lists on Active Directory Organizational Units (OUs.md).                     |
+| [ConfigurationContainerAcls](./Docs/Configurations/ConfigurationContainerAcls.md)                 | Manage access control lists on Active Directory Configuration Container objects.                   |
+| [DomainDefaultPasswordPolicy](./Docs/Configurations/DomainDefaultPasswordPolicy)                  | Manages an Active Directory domains default password policy.                                       |
+| [DomainTrusts](./Docs/Configurations/DomainTrusts.md)                                             | Manages Domain Trusts within Active Directory.                                                     |
+| [ForestServicePrincipalNames](./Docs/Configurations/ForestServicePrincipalNames.md)               | Manages the addition of supported Service Principal Names within an Active Directory Forest.       |
+| [ForestUserPrincipalNames](./Docs/Configurations/ForestUserPrincipalNames.md)                     | Manages forest wide User Principal Name (UPN) suffixes within Active Directory.                    |
+| [NodeGroupMemberships](./Docs/Configurations/NodeGroupMemberships.md)                             | Used to enroll a target node within a defined Active Directory security group.                     |
+| [ProtectFromAccidentalDeletion](./Docs/Configurations/ProtectFromAccidentalDeletion.md)           | Prevents AD objects from being deleted.                                                            |
+
+---
+
+## Project Dependencies
+
+This project does not use Desired State Configuration (DSC) as an isolated technology. DSC is just one part in a pipeline that leverages several Microsoft products, PowerShell modules, and open-source projects.
+
+### Project Resources
+
+The **DSC sesources** used in this project include:
+
+| Resource                                                     | Description                                                                                                                                                                             |
+| :----------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AccessControlDsc][AccessControlDsc]                         | The AccessControlDsc module allows you to configure and manage access control on NTFS and Registry objects. It also allows management of audit access for Active Directory object SACL. |
+| [ActiveDirectoryDsc][ActiveDirectoryDsc]                     | These DSC resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.        |
+| [GroupPolicyDsc][GroupPolicyDsc]                             | GroupPolicyDsc is a module written to provide PowerShell DSC configuration resources to manipulate Group Policy within a domain.                                                        |
+| [xPSDesiredStateConfiguration][xPSDesiredStateConfiguration] | DSC resources for configuring common operating systems features, files and settings                                                                                                     |
+
+> For information about the building blocks that perform work described by DSC Configurations, see the GitHub repo for [DSC Resources][DSC Resources].
 
 ---
 
-## Project Objectives
+### Project PowerShell modules
 
-The objective is to:
+The **PowerShell modules** used in the build pipeline of this project include:
 
-- Simplify the way to consume a shared configuration
-- Allow direct re-use in new environment *(no copy-paste/modification of DSC Config or data)*
-- Reduce the _cost_ of sharing, by automating the scaffolding (plaster), testing (pester, PSSA, Integration tests.md), building (Composite Resource), publishing to our internal [Powershell repository](https://repo.windows.mapcom.local/nuget/powershell/)
-- Ensuring high quality, by allowing the use of a testing harness fit for TDD
-- Allow Build tools, tasks and scripts to be more standardized and re-usable
-- Ensure quick and simple iterations during the development process
-
-To achieve the objectives:
-
-- Provide a familiar scaffolding structure similar to PowerShell modules
-- Create a model that can be self contained (or bootstrap itself with minimum dependencies.md)
-- Be CI/CD tool independant
-- Declare Dependencies in Module Manifest for Pulling requirements from a gallery
-- Embed default Configuration Data alongside configs
-- Provides guidelines, conventions and design patterns (i.e. re-using Configuration Data)
+| Module                                     | Description                                                                                                                        |
+| :----------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| [BuildHelpers][BuildHelpers]               | Helper functions for PowerShell CI/CD scenarios                                                                                    |
+| [Datum][Datum]                             | Module to manage Hierachical Configuration Data                                                                                    |
+| [Datum.InvokeCommand][Datum.InvokeCommand] | Datum Handler module to encrypt and decrypt secrets in Datum using Dave Wyatt's ProtectedData module                               |
+| [Datum.ProtectedData][Datum.ProtectedData] | Datum Handler module to encrypt and decrypt secrets in Datum using Dave Wyatt's ProtectedData module                               |
+| [DscBuildHelpers][DscBuildHelpers]         | Build Helpers for DSC Resources and Configurations                                                                                 |
+| [InvokeBuild][InvokeBuild]                 | Build and test automation in PowerShell                                                                                            |
+| [Pester][Pester]                           | Pester provides a framework for running BDD style Tests to execute and validate PowerShell commands inside of PowerShell.          |
+| [powershell-yaml][powershell-yaml]         | Powershell module for serializing and deserializing YAML.                                                                          |
+| [ProtectedData][ProtectedData]             | Encrypt and share secret data between different users and computers.                                                               |
+| [PSScriptAnalyzer][PSScriptAnalyzer]       | Provides script analysis and checks for potential code defects in the scripts by applying a group of built-in or customized rules. |
+| [PSDeploy][PSDeploy]                       | Module to simplify PowerShell based deployments                                                                                    |
 
 ---
+
+## Project Acknowledgements
+
+This project is inspired by [Gael Colas](https://gaelcolas.com) and his opinions on how an **infrastructure represented as code** with DSC could look like. Modeling **Puppet's R10K and Hiera**, this structure allows for separating staging environments via `git` branches so that successful changes can be promoted through each environment, while keeping the infrastructure consistent (more on this later).
+
+The overall concept follows [The Release Pipeline Model](https://aka.ms/trpm), a whitepaper written by [Michael Greene](https://twitter.com/migreene) and [Steven Murawski](https://twitter.com/StevenMurawski) that is a must-read and describing itself like this:
+
+> There are benefits to be gained when patterns and practices from developer techniques are applied to operations. Notably, a fully automated solution where infrastructure is managed as code and all changes are automatically validated before reaching production. This is a process shift that is recognized among industry innovators. For organizations already leveraging these processes, it should be clear how to leverage Microsoft platforms. For organizations that are new to the topic, it should be clear how to bring this process to your environment and what it means to your organizational culture. This document explains the components of a Release Pipeline for configuration as code, the value to operations, and solutions that are used when designing a new Release Pipeline architecture.
 
 ## Project Guidelines
 
-The [DSC Resource repository](http://github.com/powershell/dscresources) includes guidance on authoring that is applicable to configurations as well.
+The [DSC Resource repository](http://github.com/powershell/dscresources) includes guidance on authoring that is applicable to **DSC configurations** as well.
 
-For more information, visit the links below:
+- [Repository Structure](./RepositoryStructure.md)
+- [Style Guidelines](./StyleGuidelines.md)
+- [Technical Summary](./TechnicalSummary.md)
 
-- [Best practices](https://github.com/PowerShell/DscResources/blob/master/BestPractices)
-- [Style guidelines](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines)
-- [Maintainers](https://github.com/PowerShell/DscResources/blob/master/Maintainers)
+[DSC Resources]: https://docs.microsoft.com/en-us/powershell/dsc/resources/resources?view=dsc-1.1
+[AccessControlDsc]: https://github.com/mcollera/AccessControlDsc
+[ActiveDirectoryDsc]: https://github.com/dsccommunity/ActiveDirectoryDsc
+[AuditPolicyDsc]: https://github.com/dsccommunity/AuditPolicyDsc
+[ComputerManagementDsc]: https://github.com/dsccommunity/ComputerManagementDsc
+[GroupPolicyDsc]: https://github.com/dsccommunity/ActiveDirectoryDsc
+[SChannelDsc]: https://github.com/dsccommunity/SChannelDsc
+[SecurityPolicyDsc]: https://github.com/dsccommunity/SecurityPolicyDsc
+[WindowsDefenderDsc]: https://github.com/erjenkin/WindowsDefenderDsc
+[WSManDsc]: https://github.com/dsccommunity/WSManDsc
+[xPSDesiredStateConfiguration]: https://github.com/dsccommunity/xPSDesiredStateConfiguration
 
-### Project Structure
-
-```
-CompositeResourceName
-│   .gitignore
-│   .gitlab-ci.yml
-│   Build.ps1
-│   CompositeResourceName.PSDeploy.ps1
-│   PSDepend.Build.psd1
-│   README.md
-│
-├───Build
-│   ├───BuildHelpers
-│   │       Invoke-InternalPSDepend.ps1
-│   │       Resolve-Dependency.ps1
-│   │       Set-PSModulePath.ps1
-│   └───Tasks
-│           CleanBuildOutput.ps1
-│           CopyModule.ps1
-│           Deploy.ps1
-│           DownloadDscResources.ps1
-│           Init.ps1
-│           IntegrationTests.ps1
-│           SetPsModulePath.ps1
-│           TestReleaseAcceptance.ps1
-│
-├───BuildOutput
-│   │   localhost_Configuration1.mof
-│   │   localhost_Configuration2.mof
-│   │   localhost_Configuration3.mof
-│   │   localhost_ConfigurationN.mof
-│   │
-│   ├───Modules
-│   │
-│   └───Pester
-│           IntegrationTestResults.xml
-│
-├───Docs
-│       Configuration1.md
-│       Configuration2.md
-│       Configuration3.md
-│       ConfigurationN.md
-│
-└───CompositeResourceName
-    │   CompositeResourceName.psd1
-    │
-    ├───DscResources
-    │   ├───Configuration1
-    │   │       Configuration1.psd1
-    │   │       Configuration1.psm1
-    │   │
-    │   ├───Configuration2
-    │   │       Configuration2.psd1
-    │   │       Configuration2.psm1
-    │   │
-    │   ├───Configuration3
-    │   │       Configuration3.psd1
-    │   │       Configuration3.psm1
-    │   │
-    │   ├───ConfigurationN
-    │   │       ConfigurationN.psd1
-    │   │       ConfigurationN.psm1
-    │   ...
-    │
-    └───Tests
-        ├───Acceptance
-        │       01 Gallery Available.Tests.ps1
-        │       02 HasDscResources.Tests.ps1
-        │       03 CanBeUninstalled.Tests.ps1
-        │
-        └───Integration
-            │   01 DscResources.Tests.ps1
-            │   02.Final.Tests.ps1
-            │
-            └───Assets
-                │   AllNodes.yml
-                │   Datum.yml
-                │   TestHelpers.psm1
-                │
-                └───Config
-                        Configuration1.yml
-                        Configuration2.yml
-                        Configuration3.yml
-                        ConfigurationN.yml
-
-```
-
-The Composite Resource should be self contained, but will require files for building/testing or development.
-
-The repository will hence need some project files on top of the files required for functionality.
-
-Adopting the 2 layers structure like so:
-
-```
-+-- CompositeResourceName\
-    +-- CompositeResourceName\
-```
-
-Allows to place Project files like build, CI configs and so on at the top level, and everything under the second level are the files that need to be shared and will be uploaded to the PSGallery.
-
-Within that second layer, the Configuration looks like a standard module with some specificities.
-
-#### Root Tree
-
-The root of the tree would be similar to a module root tree where you have supporting files for, say, the CI/CD integration.
-
-In this example, I'm illustrating the idea with:
-
-- A `Build.ps1` that defines the build workflow by composing tasks (see [SampleModule](https://github.com/gaelcolas/SampleModule))
-- A `Build/` folder, which includes the minimum tasks to bootstrap + custom ones
-- the `.gitignore` where folders like BuildOutput or kitchen specific files are added (`module/`)
-- The [PSDepend.Build.psd1](./PSDepend.Build.ps1), so that the build process can use [PSDepend](https://github.com/RamblingCookieMonster/PSDepend/) to pull any prerequisites to build this project
-- The Gitlab runner configuration file
-
-### Configuration Module Folder
-
-Very similar to a PowerShell Module folder, the Shared configuration re-use the same principles and techniques.
-
-The re-usable configuration itself is declared in the ps1, the metadata and dependencies in the psd1 to leverage all the goodies of module management, then we have some assets ordered in folders:
-
-- ConfigurationData: the default/example configuration data, organised in test suite/scenarios
-- Test Acceptance & Integration: the pester tests used to validate the configuration, per test suite/scenario
-- the examples of re-using that shared configuration, per test suite/scenario
+[BuildHelpers]: https://github.com/RamblingCookieMonster/BuildHelpers
+[Datum]: https://github.com/gaelcolas/Datum
+[Datum.InvokeCommand]: https://github.com/raandree/Datum.InvokeCommand
+[Datum.ProtectedData]: https://github.com/gaelcolas/Datum.ProtectedData
+[DscBuildHelpers]: https://github.com/gaelcolas/DscBuildHelpers
+[InvokeBuild]: https://github.com/nightroman/Invoke-Build
+[Pester]: https://github.com/pester/Pester
+[powershell-yaml]: https://github.com/cloudbase/powershell-yaml
+[ProtectedData]: https://github.com/dlwyatt/ProtectedData/
+[PSScriptAnalyzer]: https://github.com/PowerShell/PSScriptAnalyzer
+[PSDeploy]: https://github.com/RamblingCookieMonster/PSDeploy

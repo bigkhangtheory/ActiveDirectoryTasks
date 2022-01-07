@@ -32,19 +32,19 @@ This DSC configuration is used to manage group memberships of Distribution Group
 | Parameter                 | Attribute  | DataType         | Description                                                                                          | Allowed Values                                     |
 | :------------------------ | :--------- | :--------------- | :--------------------------------------------------------------------------------------------------- | :------------------------------------------------- |
 | **GroupName**             | *Required* | `[String]`       | Name of the Active Directory group.                                                                  |                                                    |
-| **Path**                  | *Optional* | `[String]`       | Location of the group within Active Directory expressed as a Distinguished Name.                     |                                                    |
-| **Ensure**                | *Optional* | `[String]`       | Specifies if this Active Directory group should be present or absent. Default value is `Present`.    | `Present`, `Absent`                                |
-| **Description**           | *Optional* | `[String]`       | Description of the Active Directory group.                                                           |                                                    |
-| **DisplayName**           | *Optional* | `[String]`       | Display name of the Active Directory group.                                                          |                                                    |
-| **Credential**            | *Optional* | `[PSCredential]` | Credentials used to enact the change upon.                                                           |                                                    |
-| **DomainController**      | *Optional* | `[String]`       | Active Directory domain controller to enact the change upon.                                         |                                                    |
-| **Members**               | *Optional* | `[String[]]`     | Active Directory group membership should match membership exactly.                                   |                                                    |
-| **MembersToInclude**      | *Optional* | `[String[]]`     | Active Directory group should include these members.                                                 |                                                    |
-| **MembersToExclude**      | *Optional* | `[String[]]`     | Active Directory group should NOT include these members.                                             |                                                    |
-| **MembershipAttribute**   | *Optional* | `[String]`       | Active Directory attribute used to perform membership operations. Default value is 'SamAccountName'. | SamAccountName, DistinguishedName, ObjectGUID, SID |
-| **ManagedBy**             | *Optional* | `[String]`       | Active Directory managed by attribute specified as a DistinguishedName.                              |                                                    |
-| **Notes**                 | *Optional* | `[String]`       | Active Directory group notes field.                                                                  |                                                    |
-| **RestoreFromRecycleBin** | *Optional* | `[Boolean]`      | Try to restore the group from the recycle bin before creating a new one.                             |                                                    |
+| **Path**                  |            | `[String]`       | Location of the group within Active Directory expressed as a Distinguished Name.                     |                                                    |
+| **Ensure**                |            | `[String]`       | Specifies if this Active Directory group should be present or absent. Default value is `Present`.    | `Present`, `Absent`                                |
+| **Description**           |            | `[String]`       | Description of the Active Directory group.                                                           |                                                    |
+| **DisplayName**           |            | `[String]`       | Display name of the Active Directory group.                                                          |                                                    |
+| **Credential**            |            | `[PSCredential]` | Credentials used to enact the change upon.                                                           |                                                    |
+| **DomainController**      |            | `[String]`       | Active Directory domain controller to enact the change upon.                                         |                                                    |
+| **Members**               |            | `[String[]]`     | Active Directory group membership should match membership exactly.                                   |                                                    |
+| **MembersToInclude**      |            | `[String[]]`     | Active Directory group should include these members.                                                 |                                                    |
+| **MembersToExclude**      |            | `[String[]]`     | Active Directory group should NOT include these members.                                             |                                                    |
+| **MembershipAttribute**   |            | `[String]`       | Active Directory attribute used to perform membership operations. Default value is 'SamAccountName'. | SamAccountName, DistinguishedName, ObjectGUID, SID |
+| **ManagedBy**             |            | `[String]`       | Active Directory managed by attribute specified as a DistinguishedName.                              |                                                    |
+| **Notes**                 |            | `[String]`       | Active Directory group notes field.                                                                  |                                                    |
+| **RestoreFromRecycleBin** |            | `[Boolean]`      | Try to restore the group from the recycle bin before creating a new one.                             |                                                    |
 
 ---
 

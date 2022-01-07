@@ -5,17 +5,17 @@
 | Parameter                       | Attribute  | DataType         | Description                                                                                      | Allowed Values |
 | ------------------------------- | ---------- | ---------------- | ------------------------------------------------------------------------------------------------ | -------------- |
 | **DomainName**                  | *Required* | `[String]`       | Name of the domain to which the password policy will be applied.                                 |                |
-| **ComplexityEnabled**           | *Optional* | `[Boolean]`      | Whether password complexity is enabled for the default password policy.                          |                |
-| **LockoutDuration**             | *Optional* | `[UInt32]`       | Length of time that an account is locked after the number of failed login attempts (minutes).    |                |
-| **LockoutObservationWindow**    | *Optional* | `[UInt32]`       | Maximum time between two unsuccessful login attempts before the counter is reset to 0 (minutes). |                |
-| **LockoutThreshold**            | *Optional* | `[UInt32]`       | Number of unsuccessful login attempts that are permitted before an account is locked out.        |                |
-| **MinPasswordAge**              | *Optional* | `[UInt32]`       | Minimum length of time that you can have the same password (minutes).                            |                |
-| **MaxPasswordAge**              | *Optional* | `[UInt32]`       | Maximum length of time that you can have the same password (minutes).                            |                |
-| **MinPasswordLength**           | *Optional* | `[UInt32]`       | Minimum number of characters that a password must contain.                                       |                |
-| **PasswordHistoryCount**        | *Optional* | `[UInt32]`       | Number of previous passwords to remember.                                                        |                |
-| **ReversibleEncryptionEnabled** | *Optional* | `[Boolean]`      | Whether the directory must store passwords using reversible encryption.                          |                |
-| **DomainController**            | *Optional* | `[String]`       | Active Directory domain controller to enact the change upon.                                     |                |
-| **Credential**                  | *Optional* | `[PSCredential]` | Credentials used to access the domain.                                                           |                |
+| **ComplexityEnabled**           |            | `[Boolean]`      | Whether password complexity is enabled for the default password policy.                          |                |
+| **LockoutDuration**             |            | `[UInt32]`       | Length of time that an account is locked after the number of failed login attempts (minutes).    |                |
+| **LockoutObservationWindow**    |            | `[UInt32]`       | Maximum time between two unsuccessful login attempts before the counter is reset to 0 (minutes). |                |
+| **LockoutThreshold**            |            | `[UInt32]`       | Number of unsuccessful login attempts that are permitted before an account is locked out.        |                |
+| **MinPasswordAge**              |            | `[UInt32]`       | Minimum length of time that you can have the same password (minutes).                            |                |
+| **MaxPasswordAge**              |            | `[UInt32]`       | Maximum length of time that you can have the same password (minutes).                            |                |
+| **MinPasswordLength**           |            | `[UInt32]`       | Minimum number of characters that a password must contain.                                       |                |
+| **PasswordHistoryCount**        |            | `[UInt32]`       | Number of previous passwords to remember.                                                        |                |
+| **ReversibleEncryptionEnabled** |            | `[Boolean]`      | Whether the directory must store passwords using reversible encryption.                          |                |
+| **DomainController**            |            | `[String]`       | Active Directory domain controller to enact the change upon.                                     |                |
+| **Credential**                  |            | `[PSCredential]` | Credentials used to access the domain.                                                           |                |
 
 ## Description
 

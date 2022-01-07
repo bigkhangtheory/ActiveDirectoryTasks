@@ -4,9 +4,9 @@
 
 | Parameter                | Attribute  | DataType   | Description                                                                                                                                                    | Allowed Values  |
 | ------------------------ | ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| **Ensure**               | *Optional* | `[String]` | Specifies if the service principal name should be added or removed. Default value is 'Present'.                                                                | Present, Absent |
+| **Ensure**               |            | `[String]` | Specifies if the service principal name should be added or removed. Default value is 'Present'.                                                                | Present, Absent |
 | **ServicePrincipalName** | *Required* | `[String]` | The full SPN to add or remove, e.g. HOST/LON-DC1.                                                                                                              |                 |
-| **Account**              | *Optional* | `[String]` | The user or computer account to add or remove the SPN to, e.g. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified. |                 |
+| **Account**              |            | `[String]` | The user or computer account to add or remove the SPN to, e.g. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified. |                 |
 
 ## Description
 

@@ -2,6 +2,12 @@
 
 This DSC configuration will manage registered Service Principal Names (SPNs) within Active Directory.
 
+A service principal name (SPN) is a unique identifier of a service instance.
+
+SPNs are used by Kerberos authentication to associate a service instance with a service logon account.
+
+This allows a client application to request that the service authenticate an account even if the client does not have the account name.
+
 <br />
 
 ## Project Information
@@ -10,7 +16,7 @@ This DSC configuration will manage registered Service Principal Names (SPNs) wit
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Source**       | https://github.com/bigkhangtheory/ActiveDirectoryTasks/tree/master/ActiveDirectoryTasks/DscResources/ActiveDirectorySPNs |
 | **Dependencies** | [ActiveDirectoryDsc][ActiveDirectoryDsc], [xPSDesiredStateConfiguration][xPSDesiredStateConfiguration]                   |
-| **Resources**    | [xWindowsFeature][xWindowsFeature]                                                                                       |
+| **Resources**    | [ADServicePrincipalName][ADServicePrincipalName], [xWindowsFeature][xWindowsFeature]                                     |
 
 <br />
 
@@ -20,10 +26,20 @@ This DSC configuration will manage registered Service Principal Names (SPNs) wit
 
 ### Table. Attributes of `ActiveDirectorySPNs`
 
-| Parameter    | Attribute  | DataType   | Description                            | Allowed Values |
-| :----------- | :--------- | :--------- | :------------------------------------- | :------------- |
-| **DomainDn** | *Required* | `[String]` | Distinguished Name (DN) of the domain. |                |
+| Parameter                 | Attribute  | DataType        | Description                              | Allowed Values |
+| :------------------------ | :--------- | :-------------- | :--------------------------------------- | :------------- |
+| **DomainDn**              | *Required* | `[String]`      | Distinguished Name (DN) of the domain.   |                |
+| **ServicePrincipalNames** |            | `[Hashtable[]]` | List of managed service principal names. |                |
 
+---
+
+#### Table. Attributes of `ActiveDirectorySPNs::ServicePrincipalNames`
+
+| Parameter                | Attribute  | DataType   | Description                                                                                                                                                    | Allowed Values      |
+| :----------------------- | :--------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------ |
+| **ServicePrincipalName** | *Required* | `[String]` | The full SPN to add or remove, e.g. HOST/LON-DC1.                                                                                                              |                     |
+| **Account**              |            | `[String]` | The user or computer account to add or remove the SPN to, e.g. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified. |                     |
+| **Ensure**               |            | `[String]` | Specifies if the service principal name should be added or removed. Default value is `Present`.                                                                | `Present`, `Absent` |
 
 ---
 
@@ -33,9 +49,6 @@ This DSC configuration will manage registered Service Principal Names (SPNs) wit
 
 ```yaml
 ActiveDirectorySPNs:
-  # A service principal name (SPN) is a unique identifier of a service instance.
-  # SPNs are used by Kerberos authentication to associate a service instance with a service logon account.
-  # This allows a client application to request that the service authenticate an account even if the client does not have the account name.
   DomainDN: DC=example,DC=com
   SPNs:
     - ServicePrincipalName: MSSQLSvc/sql01.example.com:1433
@@ -43,7 +56,6 @@ ActiveDirectorySPNs:
       Ensure:   Present
     - ServicePrincipalName: HTTP/web.example.com
       Account: WEBSERVER01$
-
 ```
 
 <br />
@@ -55,6 +67,11 @@ lookup_options:
 
   ActiveDirectorySPNs:
     merge_hash: deep
+  ActiveDirectorySPNs\ServicePrincipalNames:
+    merge_hash_array: UniqueKeyValTuples
+    merge_options:
+      tuple_keys:
+        - ServicePrincipalName
 
 ```
 

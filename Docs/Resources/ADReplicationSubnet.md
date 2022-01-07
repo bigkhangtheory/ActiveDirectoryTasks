@@ -4,11 +4,11 @@
 
 | Parameter       | Attribute  | DataType   | Description                                                                                                      | Allowed Values  |
 | --------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------- | --------------- |
-| **Ensure**      | *Optional* | `[String]` | Specifies if the Active Directory replication subnet should be present or absent. Default value is 'Present'.    | Present, Absent |
+| **Ensure**      |            | `[String]` | Specifies if the Active Directory replication subnet should be present or absent. Default value is 'Present'.    | Present, Absent |
 | **Name**        | *Required* | `[String]` | The name of the Active Directory replication subnet, e.g. 10.0.0.0/24.                                           |                 |
 | **Site**        | Required   | `[String]` | The name of the assigned Active Directory replication site, e.g. Default-First-Site-Name.                        |                 |
-| **Location**    | *Optional* | `[String]` | The location for the Active Directory replication site. Default value is empty ('') location.                    |                 |
-| **Description** | *Optional* | `[String]` | Specifies a description of the object. This parameter sets the value of the Description property for the object. |                 |
+| **Location**    |            | `[String]` | The location for the Active Directory replication site. Default value is empty ('') location.                    |                 |
+| **Description** |            | `[String]` | Specifies a description of the object. This parameter sets the value of the Description property for the object. |                 |
 
 ## Description
 

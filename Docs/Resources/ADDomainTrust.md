@@ -4,13 +4,13 @@
 
 | Parameter                | Attribute  | DataType         | Description                                                                                                                      | Allowed Values                   |
 | ------------------------ | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| **Ensure**               | *Optional* | `[String]`       | Specifies whether the computer account is present or absent. Default value is 'Present'.                                         | Present, Absent                  |
+| **Ensure**               |            | `[String]`       | Specifies whether the computer account is present or absent. Default value is 'Present'.                                         | Present, Absent                  |
 | **TargetCredential**     | Required   | `[PSCredential]` | Specifies the credentials to authenticate to the target domain.                                                                  |                                  |
 | **TargetDomainName**     | *Required* | `[String]`       | Specifies the name of the Active Directory domain that is being trusted.                                                         |                                  |
 | **TrustType**            | Required   | `[String]`       | Specifies the type of trust. The value 'External' means the context Domain, while the value 'Forest' means the context 'Forest'. | External, Forest                 |
 | **TrustDirection**       | Required   | `[String]`       | Specifies the direction of the trust.                                                                                            | Bidirectional, Inbound, Outbound |
 | **SourceDomainName**     | *Required* | `[String]`       | Specifies the name of the Active Directory domain that is requesting the trust.                                                  |                                  |
-| **AllowTrustRecreation** | *Optional* | `[Boolean]`      | Specifies if the is allowed to be recreated if required. Default value is $false.                                                |                                  |
+| **AllowTrustRecreation** |            | `[Boolean]`      | Specifies if the is allowed to be recreated if required. Default value is $false.                                                |                                  |
 
 ## Description
 

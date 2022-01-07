@@ -6,18 +6,18 @@
 | ----------------------------------- | ---------- | ---------------- | -------------------------------------------------------------------------------------------------------------- | --------------- |
 | **Name**                            | *Required* | `[String]`       | The name of the Organizational Unit (OU).                                                                      |                 |
 | **Path**                            | *Required* | `[String]`       | Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.         |                 |
-| **Ensure**                          | *Optional* | `[String]`       | Specifies whether the Organizational Unit (OU) should be present or absent. Default value is 'Present'.        | Present, Absent |
-| **Credential**                      | *Optional* | `[PSCredential]` | The credential to be used to perform the operation on Active Directory.                                        |                 |
-| **ProtectedFromAccidentalDeletion** | *Optional* | `[Boolean]`      | Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true. |                 |
-| **Description**                     | *Optional* | `[String]`       | Specifies the description of the Organizational Unit (OU). Default value is empty ('').                        |                 |
-| **RestoreFromRecycleBin**           | *Optional* | `[Boolean]`      | Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.                    |                 |
+| **Ensure**                          |            | `[String]`       | Specifies whether the Organizational Unit (OU) should be present or absent. Default value is 'Present'.        | Present, Absent |
+| **Credential**                      |            | `[PSCredential]` | The credential to be used to perform the operation on Active Directory.                                        |                 |
+| **ProtectedFromAccidentalDeletion** |            | `[Boolean]`      | Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true. |                 |
+| **Description**                     |            | `[String]`       | Specifies the description of the Organizational Unit (OU). Default value is empty ('').                        |                 |
+| **RestoreFromRecycleBin**           |            | `[Boolean]`      | Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.                    |                 |
 | **DistinguishedName**               | Read       | `[String]`       | Returns the X.500 distinguished name of the Organizational Unit.                                               |                 |
 
 ## Description
 
-The ADOrganizational Unit DSC resource will manage Organizational Units (OUs) within Active Directory. An OU is a
-subdivision within an Active Directory into which you can place users, groups, computers, and other organizational
-units.
+The ADOrganizational Unit DSC resource will manage Organizational Units (OUs) within Active Directory.
+
+An OU is a subdivision within an Active Directory into which you can place users, groups, computers, and other organizational units.
 
 ## Requirements
 

@@ -20,34 +20,34 @@ This DSC configuration manages groups and group memberships within Active Direct
 
 ### Table. Attributes of `ActiveDirectoryGroups`
 
-| Parameter    | Attribute  | DataType        | Description                                                           | Allowed Values |
-| :----------- | :--------- | :-------------- | :-------------------------------------------------------------------- | :------------- |
-| **DomainDn** | *Required* | `[String]`      | Distinguished Name (DN) of the domain.                                |                |
-| **Groups**   |            | `[Hashtable[]]` | Specifies a list of Security Groups to create within Active Diretory. |                |
+| Parameter            | Attribute  | DataType         | Description                                                           | Allowed Values |
+| :------------------- | :--------- | :--------------- | :-------------------------------------------------------------------- | :------------- |
+| **DomainDn**         | *Required* | `[String]`       | Distinguished Name (DN) of the domain.                                |                |
+| **Groups**           |            | `[Hashtable[]]`  | Specifies a list of Security Groups to create within Active Diretory. |                |
+| **DomainController** |            | `[String]`       | Active Directory domain controller to enact the change upon.          |                |
+| **Credential**       |            | `[PSCredential]` | Credentials used to enact the change upon.                            |                |
 
 ---
 
 #### Table. Attributes of `Groups`
 
-| Parameter                 | Attribute  | DataType         | Description                                                                                          | Allowed Values                                             |
-| ------------------------- | ---------- | ---------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **GroupName**             | *Required* | `[String]`       | Name of the Active Directory group.                                                                  |                                                            |
-| **GroupScope**            |            | `[String]`       | Active Directory group scope. Default value is `Global`.                                             | `DomainLocal`, `Global`, `Universal`                       |
-| **Category**              |            | `[String]`       | Active Directory group category. Default value is `Security`.                                        | `Security`, `Distribution`                                 |
-| **Path**                  |            | `[String]`       | Location of the group within Active Directory expressed as a Distinguished Name.                     |                                                            |
-| **Ensure**                |            | `[String]`       | Specifies if this Active Directory group should be present or absent. Default value is `Present`.    | `Present`, `Absent`                                        |
-| **Description**           |            | `[String]`       | Description of the Active Directory group.                                                           |                                                            |
-| **DisplayName**           |            | `[String]`       | Display name of the Active Directory group.                                                          |                                                            |
-| **Credential**            |            | `[PSCredential]` | Credentials used to enact the change upon.                                                           |                                                            |
-| **DomainController**      |            | `[String]`       | Active Directory domain controller to enact the change upon.                                         |                                                            |
-| **Members**               |            | `[String[]]`     | Active Directory group membership should match membership exactly.                                   |                                                            |
-| **MembersToInclude**      |            | `[String[]]`     | Active Directory group should include these members.                                                 |                                                            |
-| **MembersToExclude**      |            | `[String[]]`     | Active Directory group should NOT include these members.                                             |                                                            |
-| **MembershipAttribute**   |            | `[String]`       | Active Directory attribute used to perform membership operations. Default value is `SamAccountName`. | `SamAccountName`, `DistinguishedName`, `ObjectGUID`, `SID` |
-| **ManagedBy**             |            | `[String]`       | Active Directory managed by attribute specified as a DistinguishedName.                              |                                                            |
-| **Notes**                 |            | `[String]`       | Active Directory group notes field.                                                                  |                                                            |
-| **RestoreFromRecycleBin** |            | `[Boolean]`      | Try to restore the group from the recycle bin before creating a new one.                             |                                                            |
-| **MemberOf**              |            | `[String[]]`     | Specify Active Directory groups for nested group membership.                                         |                                                            |
+| Parameter                 | Attribute  | DataType     | Description                                                                                          | Allowed Values                                             |
+| ------------------------- | ---------- | ------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **GroupName**             | *Required* | `[String]`   | Name of the Active Directory group.                                                                  |                                                            |
+| **GroupScope**            |            | `[String]`   | Active Directory group scope. Default value is `Global`.                                             | `DomainLocal`, `Global`, `Universal`                       |
+| **Category**              |            | `[String]`   | Active Directory group category. Default value is `Security`.                                        | `Security`, `Distribution`                                 |
+| **Path**                  |            | `[String]`   | Location of the group within Active Directory expressed as a Distinguished Name.                     |                                                            |
+| **Ensure**                |            | `[String]`   | Specifies if this Active Directory group should be present or absent. Default value is `Present`.    | `Present`, `Absent`                                        |
+| **Description**           |            | `[String]`   | Description of the Active Directory group.                                                           |                                                            |
+| **DisplayName**           |            | `[String]`   | Display name of the Active Directory group.                                                          |                                                            |
+| **Members**               |            | `[String[]]` | Active Directory group membership should match membership exactly.                                   |                                                            |
+| **MembersToInclude**      |            | `[String[]]` | Active Directory group should include these members.                                                 |                                                            |
+| **MembersToExclude**      |            | `[String[]]` | Active Directory group should NOT include these members.                                             |                                                            |
+| **MembershipAttribute**   |            | `[String]`   | Active Directory attribute used to perform membership operations. Default value is `SamAccountName`. | `SamAccountName`, `DistinguishedName`, `ObjectGUID`, `SID` |
+| **ManagedBy**             |            | `[String]`   | Active Directory managed by attribute specified as a DistinguishedName.                              |                                                            |
+| **Notes**                 |            | `[String]`   | Active Directory group notes field.                                                                  |                                                            |
+| **RestoreFromRecycleBin** |            | `[Boolean]`  | Try to restore the group from the recycle bin before creating a new one.                             |                                                            |
+| **MemberOf**              |            | `[String[]]` | Specify Active Directory groups for nested group membership.                                         |                                                            |
 
 <br />
 
